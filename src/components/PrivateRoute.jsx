@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/authContext";
-
+import React from "react";
 // role can be single string or array of allowed roles
 export default function PrivateRoute({ children, role }) {
   const { user, loading, isAuthenticated } = useAuth();

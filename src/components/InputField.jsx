@@ -3,7 +3,6 @@ import { useField } from 'formik';
 
 const InputField = ({ label, icon: Icon, ...props }) => {
     const [field, meta] = useField(props);
-
     return (
         <div className="flex flex-col">
             <label htmlFor={props.name} className="text-xs font-medium text-gray-700 mb-1">
@@ -14,7 +13,8 @@ const InputField = ({ label, icon: Icon, ...props }) => {
                 <input
                     {...field}
                     {...props}
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#043873] ${
+                    value={field.value || ''}
+                    className={`w-full ${Icon ? 'pl-10' : 'pl-3'} pr-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#043873] ${
                         meta.touched && meta.error ? 'border-red-500 bg-red-50 focus:ring-red-500' : 'border-gray-300'
                     }`}
                 />

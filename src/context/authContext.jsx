@@ -8,7 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
- // ===============================
+  // ===============================
   // Check login status on refresh
   // ===============================
   useEffect(() => {
@@ -25,38 +25,39 @@ export const AuthProvider = ({ children }) => {
     };
     fetchUser();
   }, []);
+
   // ===============================
-  // SIGNUP (no navigate inside context)
+  // SIGNUP
   // ===============================
-  const signup = async (values) => {
+  const signup = async (formData) => {
     try {
-      const res = await api.post("/auth/signup", values, { withCredentials: true });
-      
+      const res = await api.post("/auth/signup", formData, {
+        withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
       if (!res?.data?.user) throw new Error("No user returned from server");
-      
+
       const user = res.data.user;
       setUser(user);
-
-      return user; // return user to handle redirect in component
+      return user;
     } catch (err) {
       console.error("Signup failed:", err);
-      throw err; // will be caught by Formik in component
+      throw err;
     }
   };
 
   // ===============================
-  // LOGIN (no navigate inside context)
+  // LOGIN
   // ===============================
   const login = async (values) => {
     try {
       const res = await api.post("/auth/login", values, { withCredentials: true });
-      
       if (!res?.data?.user) throw new Error("No user returned from server");
-      
+
       const user = res.data.user;
       setUser(user);
-
-      return user; // return user to handle redirect in component
+      return user;
     } catch (err) {
       console.error("Login failed:", err);
       throw err;
@@ -76,7 +77,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout, loading, isAuthenticated: !!user }}>
+    <AuthContext.Provider
+      value={{ user, setUser, login, signup, logout, loading, isAuthenticated: !!user }}
+    >
       {children}
     </AuthContext.Provider>
   );
