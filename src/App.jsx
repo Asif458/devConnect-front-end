@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import PrivateRoute from "./components/PrivateRoute";
-import DeveloperDashboard from "./pages/DeveloperDashboard";
+import DeveloperDashboard from "./pages/DeveloperDashboard/Index";
 import MentorDashboard from "./pages/MentorDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import Login from "./pages/Login";
