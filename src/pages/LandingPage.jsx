@@ -1,9 +1,7 @@
 import React from 'react';
 import { Search, BookOpen, Video, Users, ArrowRight } from 'lucide-react';
 
- 
 export default function LandingPage() {
-  // --- Feature Data ---
   const features = [
     {
       icon: <Search size={28} className="text-[#043873]" />,
@@ -39,19 +37,27 @@ export default function LandingPage() {
             <h1 className="text-xl font-bold text-[#043873]">DevConnect</h1>
           </div>
           <div className="flex items-center space-x-3">
-            <a href="/login" className="text-gray-600 hover:text-[#043873] font-medium text-sm transition-colors">
+            <a
+              href="/login"
+              className="text-gray-600 hover:text-[#043873] font-medium text-sm transition-colors"
+            >
               Login
             </a>
-            <a href="/signup" className="bg-[#043873] text-white font-semibold text-sm px-4 py-2 rounded-lg hover:bg-[#032f60] transition-all shadow-sm hover:shadow-md">
+            <a
+              href="/signup"
+              className="bg-[#043873] text-white font-semibold text-sm px-4 py-2 rounded-lg hover:bg-[#032f60] transition-all shadow-sm hover:shadow-md"
+            >
               Register
             </a>
           </div>
         </div>
       </header>
 
-      <main className="flex flex-col flex-grow">
+      {/* --- Main Content --- */}
+      <main className="flex-grow">
         {/* --- Hero Section --- */}
-        <section className="bg-gray-50 flex-grow flex items-center py-12">
+        <section className="bg-gray-50 min-h-[calc(100vh-72px)] flex items-center py-12">
+          {/* 100vh minus header height ensures perfect fit */}
           <div className="w-full max-w-screen-2xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-12">
             <div className="text-center md:text-left md:w-1/2">
               <h1 className="text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight">
@@ -68,7 +74,8 @@ export default function LandingPage() {
                 <ArrowRight className="w-5 h-5 ml-2" />
               </a>
             </div>
-             <div className="md:w-1/2 flex justify-center mt-8 md:mt-0">
+
+            <div className="md:w-1/2 flex justify-center mt-8 md:mt-0">
               <img
                 src="https://www.shutterstock.com/image-vector/vector-illustration-concept-young-technical-600nw-2005097732.jpg"
                 alt="Developer community connecting and learning"
@@ -79,7 +86,7 @@ export default function LandingPage() {
         </section>
 
         {/* --- Features Section --- */}
-        <section className="py-16 sm:py-20">
+        <section className="py-20 bg-white">
           <div className="w-full max-w-screen-2xl mx-auto px-6">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
@@ -89,6 +96,7 @@ export default function LandingPage() {
                 Everything you need to accelerate your learning and career growth, all in one place.
               </p>
             </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {features.map((feature, index) => (
                 <div
@@ -112,15 +120,16 @@ export default function LandingPage() {
       </main>
 
       {/* --- Footer --- */}
-      <footer className="bg-[#043873] text-white">
+      <footer className="bg-[#043873] text-white mt-auto">
         <div className="w-full max-w-screen-2xl mx-auto px-6 py-8">
           <div className="grid grid-cols-1 md:grid-cols-5 gap-8 text-sm items-start">
-             <div className="flex items-center space-x-2 mb-6 md:mb-0 md:col-span-2">
-                <div className="bg-white text-[#043873] font-bold text-xl rounded-md px-3 py-1">
-                    DC
-                </div>
-                <h1 className="text-xl font-bold">DevConnect</h1>
+            <div className="flex items-center space-x-2 mb-6 md:mb-0 md:col-span-2">
+              <div className="bg-white text-[#043873] font-bold text-xl rounded-md px-3 py-1">
+                DC
+              </div>
+              <h1 className="text-xl font-bold">DevConnect</h1>
             </div>
+
             <div>
               <h4 className="font-semibold mb-3">Links</h4>
               <ul>
@@ -128,6 +137,7 @@ export default function LandingPage() {
                 <li className="mt-2"><a href="#" className="text-gray-300 hover:text-white">Blog</a></li>
               </ul>
             </div>
+
             <div>
               <h4 className="font-semibold mb-3">Support</h4>
               <ul>
@@ -135,6 +145,7 @@ export default function LandingPage() {
                 <li className="mt-2"><a href="#" className="text-gray-300 hover:text-white">Contact</a></li>
               </ul>
             </div>
+
             <div>
               <h4 className="font-semibold mb-3">Legal</h4>
               <ul>
@@ -143,6 +154,7 @@ export default function LandingPage() {
               </ul>
             </div>
           </div>
+
           <div className="mt-8 border-t border-gray-700 pt-4 text-center text-xs text-gray-400">
             <p>&copy; {new Date().getFullYear()} DevConnect. All rights reserved.</p>
           </div>
@@ -151,4 +163,3 @@ export default function LandingPage() {
     </div>
   );
 }
-

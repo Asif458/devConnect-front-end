@@ -7,7 +7,7 @@ import InputField from "../components/InputField";
 import { useAuth } from "../context/authContext";
 import { useNavigate } from "react-router-dom";
 
-// ✅ Validation Schema
+//   Validation Schema
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Email is required"),
   password: Yup.string().required("Password is required"),
@@ -17,7 +17,7 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  // ✅ Role-based redirect logic
+  //   Role-based redirect logic
   const redirectByRole = (role) => {
     switch (role) {
       case "developer":
@@ -36,7 +36,7 @@ export default function Login() {
 
   const handleSubmit = async (values, { setSubmitting, setErrors }) => {
     try {
-      const user = await login(values); // calls backend /auth/login
+      const user = await login(values); 
       redirectByRole(user.role); // redirect based on role
     } catch (error) {
       console.error(error);

@@ -1,28 +1,23 @@
 import React from "react";
 import { Trash2, Edit2 } from "lucide-react";
 
-function TableCard({ users, onEdit, onDelete, searchTerm, setSearchTerm, filterRole, setFilterRole, currentPage, setCurrentPage }) {
-  const itemsPerPage = 10;
-
-  // Filter users
-  const filteredUsers = users.filter(u => {
-    const matchSearch = u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchRole = filterRole === "all" || u.role === filterRole;
-    return matchSearch && matchRole;
-  });
-
-  const paginatedUsers = filteredUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-
+function TableCard({
+  users,
+  onEdit,
+  onDelete,
+  searchTerm,
+  setSearchTerm,
+  filterRole,
+  setFilterRole,
+  currentPage,
+  setCurrentPage,
+  totalPages,
+}) {
   return (
     <div className="space-y-4">
       {/* Search & Filter */}
       <div className="flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-xl shadow-lg">
         <div className="flex-1 relative">
-          <svg className="absolute left-3 top-3 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
           <input
             type="text"
             placeholder="Search by name or email..."
@@ -31,7 +26,7 @@ function TableCard({ users, onEdit, onDelete, searchTerm, setSearchTerm, filterR
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-3 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <select
@@ -61,16 +56,20 @@ function TableCard({ users, onEdit, onDelete, searchTerm, setSearchTerm, filterR
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {paginatedUsers.map((u) => (
+            {users.map((u) => (
               <tr key={u._id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4 font-medium text-gray-900">{u.name}</td>
                 <td className="px-6 py-4 text-gray-600">{u.email}</td>
                 <td className="px-6 py-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold capitalize ${
-                    u.role === "admin" ? "bg-purple-100 text-purple-700" :
-                    u.role === "mentor" ? "bg-green-100 text-green-700" :
-                    "bg-blue-100 text-blue-700"
-                  }`}>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-bold capitalize ${
+                      u.role === "admin"
+                        ? "bg-purple-100 text-purple-700"
+                        : u.role === "mentor"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-blue-100 text-blue-700"
+                    }`}
+                  >
                     {u.role}
                   </span>
                 </td>
@@ -100,7 +99,7 @@ function TableCard({ users, onEdit, onDelete, searchTerm, setSearchTerm, filterR
       {totalPages > 1 && (
         <div className="flex items-center justify-between bg-white p-4 rounded-xl shadow-lg">
           <p className="text-sm text-gray-600">
-            Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredUsers.length)} of {filteredUsers.length} users
+            Page {currentPage} of {totalPages}
           </p>
           <div className="flex gap-2">
             <button
@@ -110,21 +109,19 @@ function TableCard({ users, onEdit, onDelete, searchTerm, setSearchTerm, filterR
             >
               Previous
             </button>
-            <div className="flex gap-1">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`w-10 h-10 rounded-lg font-medium transition-colors ${
-                    currentPage === page
-                      ? "bg-blue-600 text-white"
-                      : "border border-gray-300 text-gray-700 hover:bg-gray-50"
-                  }`}
-                >
-                  {page}
-                </button>
-              ))}
-            </div>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`w-10 h-10 rounded-lg font-medium transition-colors ${
+                  currentPage === page
+                    ? "bg-blue-600 text-white"
+                    : "border border-gray-300 text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                {page}
+              </button>
+            ))}
             <button
               onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
               disabled={currentPage === totalPages}
@@ -139,5 +136,4 @@ function TableCard({ users, onEdit, onDelete, searchTerm, setSearchTerm, filterR
   );
 }
 
-
-export default TableCard
+export default TableCard;

@@ -6,9 +6,9 @@ import InputField from "../components/InputField";
 import Button from "../components/Button";
 import api from "../api/axios";
 
-// ====================
+ 
 // Validation Schemas
-// ====================
+ 
 
 const ForgotPasswordSchema = Yup.object().shape({
     email: Yup.string().email("Invalid email").required("Email is required"),
@@ -22,7 +22,7 @@ const ResetPasswordSchema = Yup.object().shape({
 // --- Main Component ---
 
 export default function ForgotPassword() {
-    const [view, setView] = useState('forgot'); // 'forgot' or 'reset'
+    const [view, setView] = useState('forgot');  
     const [userEmail, setUserEmail] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
 
@@ -45,7 +45,7 @@ export default function ForgotPassword() {
         const submissionData = { email: userEmail, otp: values.otp, newPassword: values.newPassword };
         
         try {
-            await api.post('/auth/reset-password', submissionData);
+            await api.post('/auth/verify-otp', submissionData);
             
             // On success:
             setSuccessMessage("Password has been reset successfully! Redirecting to login...");

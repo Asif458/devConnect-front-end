@@ -11,13 +11,16 @@ import {
   Settings,
   ChevronDown,
   LogOut,
+  CheckCircle,
 } from "lucide-react";
 import Modal from "../components/Modal";
 import StatCard from "../components/StatCard";
 import ChartCard from "../components/ChartCard";
 import TableCard from "../components/UserTable";
+import Button from "../components/Button";
 import api from "../api/axios";
 import { useAuth } from "../context/authContext";
+import toast, { Toaster } from "react-hot-toast"; // ✅ hot-toast import
 
 export default function AdminDashboard() {
   const { logout } = useAuth();
@@ -33,24 +36,27 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRole, setFilterRole] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState({ limit: 15, totalPages: 1, total: 0 });
 
   const [editUser, setEditUser] = useState(null);
   const [deleteUser, setDeleteUser] = useState(null);
   const [editForm, setEditForm] = useState({ name: "", role: "" });
   const [modalError, setModalError] = useState("");
 
+  // ✅ NEW STATE FOR PENDING MENTORS
+  const [pendingMentors, setPendingMentors] = useState([]);
+
   const navItems = [
     { name: "Dashboard", icon: LayoutDashboard, tab: "dashboard" },
     { name: "Users & Mentors", icon: Users, tab: "users" },
+    { name: "Approve Mentors", icon: CheckCircle, tab: "approveMentors" },
     { name: "Content", icon: ShieldCheck, tab: "content" },
     { name: "Notifications", icon: Bell, tab: "notifications" },
     { name: "Reports", icon: BarChart2, tab: "reports" },
     { name: "Payments", icon: DollarSign, tab: "payments" },
   ];
 
-  // =====================
-  // Fetch Dashboard Stats
-  // =====================
+  // --- Dashboard Stats
   useEffect(() => {
     if (activeTab === "dashboard") {
       api
@@ -63,24 +69,76 @@ export default function AdminDashboard() {
     }
   }, [activeTab]);
 
-  // =====================
-  // Fetch Users
-  // =====================
+  // --- Users Fetch
   useEffect(() => {
-    if (activeTab === "users") {
-      api
-        .get("/admin/users")
-        .then((res) => {
-          setUsers(res.data.users || []);
-          setError(null);
-        })
-        .catch(() => setError("Failed to load user data"));
+  if (activeTab !== "users") return;
+
+  const fetchUsers = async () => {
+    try {
+      const params = {
+        page: currentPage,
+        limit: pagination.limit,
+        search: searchTerm,
+      };
+      if (filterRole !== "all") params.role = filterRole;
+
+      const res = await api.get("/admin/users", { params });
+      setUsers(res.data.users || []);
+      setPagination(prev => ({
+        ...prev,
+        totalPages: res.data.totalPages || 1,
+        total: res.data.total || 0,
+      }));
+      setError(null);
+    } catch {
+      setError("Failed to load user data");
+    }
+  };
+
+  fetchUsers();
+}, [activeTab, currentPage, searchTerm, filterRole, pagination.limit]);
+
+  // --- Pending Mentors Fetch
+  useEffect(() => {
+    if (activeTab === "approveMentors") {
+      const fetchPendingMentors = async () => {
+        try {
+          const res = await api.get("/admin/pending-mentors");
+          setPendingMentors(res.data || []);
+        } catch (err) {
+          console.error("Failed to fetch pending mentors:", err);
+          toast.error("Failed to fetch pending mentors");
+        }
+      };
+      fetchPendingMentors();
     }
   }, [activeTab]);
 
-  // =====================
-  // Fetch Admin Profile
-  // =====================
+  // --- Approve Mentor
+  const handleApproveMentor = async (mentorId) => {
+    try {
+      await api.put(`/admin/approve-mentor/${mentorId}`);
+      setPendingMentors((prev) => prev.filter((m) => m._id !== mentorId));
+      toast.success("Mentor approved successfully!"); // ✅ toast notification
+    } catch (err) {
+      console.error("Failed to approve mentor:", err);
+      toast.error("Failed to approve mentor");
+    }
+  };
+
+  // --- Reject Mentor
+  const handleRejectMentor = async (mentorId) => {
+    try {
+      await api.put(`/admin/reject-mentor/${mentorId}`);
+      setPendingMentors((prev) => prev.filter((m) => m._id !== mentorId));
+      toast.success("Mentor rejected successfully!"); // ✅ toast notification
+    } catch (err) {
+      console.error("Failed to reject mentor:", err);
+      toast.error("Failed to reject mentor");
+    }
+  };
+
+  // --- Fetch Admin Profile
   useEffect(() => {
     api
       .get("/auth/profile")
@@ -88,9 +146,7 @@ export default function AdminDashboard() {
       .catch(() => setAdmin({ name: "Admin" }));
   }, []);
 
-  // =====================
-  // Edit Handler
-  // =====================
+  // --- Edit User
   const handleEditSave = async () => {
     setModalError("");
     if (!editForm.name.trim()) {
@@ -104,20 +160,17 @@ export default function AdminDashboard() {
       });
       if (res.status === 200) {
         setUsers((prev) =>
-          prev.map((u) =>
-            u._id === editUser._id ? { ...u, ...editForm } : u
-          )
+          prev.map((u) => (u._id === editUser._id ? { ...u, ...editForm } : u))
         );
         setEditUser(null);
+        toast.success("User updated successfully!");
       }
     } catch (err) {
       setModalError(err.response?.data?.message || "Failed to update user");
     }
   };
 
-  // =====================
-  // Delete Handler
-  // =====================
+  // --- Delete User
   const handleDelete = async () => {
     setModalError("");
     try {
@@ -125,6 +178,7 @@ export default function AdminDashboard() {
       if (res.status === 200) {
         setUsers((prev) => prev.filter((u) => u._id !== deleteUser._id));
         setDeleteUser(null);
+        toast.success("User deleted successfully!");
       }
     } catch (err) {
       setModalError(err.response?.data?.message || "Failed to delete user");
@@ -133,6 +187,8 @@ export default function AdminDashboard() {
 
   return (
     <div className="flex h-screen w-screen bg-gray-100 overflow-hidden">
+      <Toaster position="top-right" reverseOrder={false} /> {/* ✅ hot-toast container */}
+
       {/* Sidebar */}
       <aside
         className={`${
@@ -145,11 +201,7 @@ export default function AdminDashboard() {
             onClick={() => setSidebarExpanded(!sidebarExpanded)}
             className="p-1 hover:bg-slate-700 rounded-lg"
           >
-            {sidebarExpanded ? (
-              <ChevronLeft size={20} />
-            ) : (
-              <ChevronRight size={20} />
-            )}
+            {sidebarExpanded ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
           </button>
         </div>
 
@@ -187,17 +239,17 @@ export default function AdminDashboard() {
               ? "Dashboard Overview"
               : activeTab === "users"
               ? "Manage Users & Mentors"
+              : activeTab === "approveMentors"
+              ? "Approve Mentors"
               : activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
           </h2>
 
-          {/* Profile + Notifications */}
           <div className="flex items-center gap-4 relative">
             <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg relative">
               <Bell size={20} />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
 
-            {/* Profile dropdown */}
             <div className="relative">
               <button
                 onClick={() => setProfileDropdown(!profileDropdown)}
@@ -292,7 +344,64 @@ export default function AdminDashboard() {
                 setFilterRole={setFilterRole}
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}
+                totalPages={pagination.totalPages}
               />
+            </div>
+          )}
+
+          {/* ✅ Approve Mentors Tab */}
+          {activeTab === "approveMentors" && (
+            <div className="w-full">
+              <div className="bg-white rounded-xl shadow-lg overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-6 py-4 text-left font-semibold text-gray-700">Name</th>
+                      <th className="px-6 py-4 text-left font-semibold text-gray-700">Email</th>
+                      <th className="px-6 py-4 text-left font-semibold text-gray-700">Experience</th>
+                      <th className="px-6 py-4 text-left font-semibold text-gray-700">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {pendingMentors.length > 0 ? (
+                      pendingMentors.map((mentor) => (
+                        <tr key={mentor._id} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-6 py-4 font-medium text-gray-900">{mentor.name}</td>
+                          <td className="px-6 py-4 text-gray-600">{mentor.email}</td>
+                          <td className="px-6 py-4">
+                            {mentor.mentorProfile?.experience || "N/A"}
+                          </td>
+                          <td className="px-6 py-4 flex gap-3">
+                            <Button
+                              variant="primary"
+                              onClick={() => handleApproveMentor(mentor._id)}
+                              className="!w-auto"
+                            >
+                              Approve
+                            </Button>
+                            <Button
+                              variant="outline"
+                              onClick={() => handleRejectMentor(mentor._id)}
+                              className="!w-auto border-red-500 text-red-600 hover:bg-red-50"
+                            >
+                              Reject
+                            </Button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td
+                          colSpan="4"
+                          className="text-center text-gray-600 py-6 font-medium"
+                        >
+                          No pending mentors right now.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </main>
@@ -307,33 +416,23 @@ export default function AdminDashboard() {
         confirmText="Save Changes"
       >
         {modalError && (
-          <p className="text-red-600 text-sm mb-4 p-3 bg-red-50 rounded-lg">
-            {modalError}
-          </p>
+          <p className="text-red-600 text-sm mb-4 p-3 bg-red-50 rounded-lg">{modalError}</p>
         )}
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Full Name
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
             <input
               type="text"
               value={editForm.name}
-              onChange={(e) =>
-                setEditForm({ ...editForm, name: e.target.value })
-              }
+              onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Role
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
             <select
               value={editForm.role}
-              onChange={(e) =>
-                setEditForm({ ...editForm, role: e.target.value })
-              }
+              onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="developer">Developer</option>
@@ -354,9 +453,7 @@ export default function AdminDashboard() {
         isDanger={true}
       >
         {modalError && (
-          <p className="text-red-600 text-sm mb-4 p-3 bg-red-50 rounded-lg">
-            {modalError}
-          </p>
+          <p className="text-red-600 text-sm mb-4 p-3 bg-red-50 rounded-lg">{modalError}</p>
         )}
         <p className="text-gray-700">
           Are you sure you want to delete{" "}

@@ -1,18 +1,24 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/authContext";
 import React from "react";
-// role can be single string or array of allowed roles
+
 export default function PrivateRoute({ children, role }) {
   const { user, loading, isAuthenticated } = useAuth();
 
-  if (loading) return <div>Loading...</div>; // optional spinner
-
+  if (loading) return <div>Loading...</div>;
   if (!isAuthenticated) return <Navigate to="/login" />;
 
-  // role check
+  // Role check
   if (role && ![...([role].flat())].includes(user.role)) {
-    return <Navigate to="/login" />; // or a 403 page
+    return <Navigate to="/login" />;
   }
 
-  return children;
+  // Mentor approval check
+  if (user.role === "mentor") {
+    if (user.status === "pending" || user.status === "rejected") {
+      return <Navigate to="/pending-approval" />;
+    }
+  }
+
+  return children; // developers/admins or approved mentors
 }
