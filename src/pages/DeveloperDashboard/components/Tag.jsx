@@ -5,7 +5,7 @@
 import React from 'react';
 // FIX: Changing path from '../../utils/constants' to '../utils/constants'
 // This attempts to navigate from /components/Tag/ up to /components/ and then over to /utils/
-import { getTagColor } from '../utils/constants'; 
+import { getTagColor } from '../../../utils/constants'; 
 
 const Tag = ({ children, index = 0 }) => {
   // Use the utility function to get the correct Tailwind color classes

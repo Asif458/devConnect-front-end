@@ -1,7 +1,7 @@
 import { Home, Users, BookOpen, Clock, Mail, LayoutGrid, User } from 'lucide-react';
 
 // --- THEME CONSTANTS ---
-export const PRIMARY_COLOR = '#043873'; // Dark Blue
+export const PRIMARY_COLOR = '#032f60'; // Dark Blue
 export const ACCENT_COLOR = '#FFC107'; // Gold/Premium
 
 // --- SIDEBAR NAVIGATION DATA ---

@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import PrivateRoute from "./components/PrivateRoute";
 import DeveloperDashboard from "./pages/DeveloperDashboard/Index";
 import MentorDashboard from "./pages/MentorDashboard";
-import AdminDashboard from "./pages/AdminDashboard";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -10,6 +9,7 @@ import LandingPage from "./pages/LandingPage";
 import PendingApproval from "./pages/PendingApproval"; // NEW
 
 import React from "react";
+import AdminDashboard from "./pages/AdminDashboard/Index";
 
 function App() {
   return (
