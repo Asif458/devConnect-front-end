@@ -1,11 +1,15 @@
-// HomeFeed.jsx
 import React, { useState, useEffect } from "react";
+import { ImagePlus, X } from "lucide-react";
 import PostCard from "./components/PostCard";
 import Button from "../../components/Button";
 import api from "../../api/axios";
+import { useAuth } from "../../context/authContext";
 
 export default function HomeFeed() {
+  const { user } = useAuth();
   const [newPost, setNewPost] = useState("");
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -24,95 +28,238 @@ export default function HomeFeed() {
     fetchPosts();
   }, []);
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Image size should be less than 5MB");
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      alert("Please select an image file");
+      return;
+    }
+
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setImagePreview(reader.result);
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+  };
+
   const handlePostSubmit = async () => {
-    if (!newPost.trim() || submitting) return;
+    if ((!newPost.trim() && !imageFile) || submitting) return;
+
     setSubmitting(true);
     try {
-      const res = await api.post("/post", { content: newPost });
+      const formData = new FormData();
+      formData.append("content", newPost);
+
+      if (imageFile) {
+        formData.append("image", imageFile);
+      }
+
+      const res = await api.post("/post", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
       setPosts((prev) => [res.data, ...prev]);
       setNewPost("");
+      setImageFile(null);
+      setImagePreview(null);
     } catch (err) {
-      console.error("Error creating post:", err);
+      console.error("Error creating post:", err.response?.data || err);
+      alert(`Failed to create post: ${err.response?.data?.error || err.message}`);
     } finally {
       setSubmitting(false);
     }
   };
 
+  const handleDeletePost = (postId) => {
+    setPosts((prev) => prev.filter((post) => post._id !== postId));
+  };
+
+  const handleUpdatePost = (updatedPost) => {
+    setPosts((prev) =>
+      prev.map((post) => (post._id === updatedPost._id ? updatedPost : post))
+    );
+  };
+
+  const getUserInitials = () => {
+    if (!user?.name) return "U";
+    return user.name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
+  };
+
   return (
-    <div className="flex flex-col w-full min-h-0">
+    <div className="flex flex-col w-full">
       {/* Header */}
       <div className="mb-6 w-full">
-        <h2 className="text-2xl font-bold text-gray-900">Community Feed</h2>
-        <p className="text-gray-500">
-          Latest updates from developers and mentors in your network
+        <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+          Community Feed
+        </h2>
+        <p className="text-sm md:text-base text-gray-600 mt-1">
+          Share your thoughts with developers and mentors
         </p>
       </div>
 
-      {/* New Post Card */}
-      <div className="bg-white p-4 md:p-6 rounded-2xl shadow-md border border-gray-100 mb-6 w-full">
-        <h3 className="text-lg font-semibold mb-3 text-gray-800">
-          Create a New Post
-        </h3>
-        <div className="flex items-start space-x-4 w-full">
-          <div className="w-10 h-10 rounded-full bg-gray-300 flex-shrink-0"></div>
+      {/* Modern Create Post Card */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 mb-6 w-full transition-all hover:shadow-md">
+        {/* User Info Row */}
+        <div className="p-4 md:p-6 flex items-center gap-3 border-b border-gray-100">
+          <div className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-sm md:text-base font-semibold text-white bg-gradient-to-br from-sky-400 to-blue-500 flex-shrink-0 overflow-hidden shadow-sm">
+            {user?.profilePhoto ? (
+              <img
+                src={user.profilePhoto}
+                alt={user.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.style.display = "none";
+                  e.target.parentElement.textContent = getUserInitials();
+                }}
+              />
+            ) : (
+              getUserInitials()
+            )}
+          </div>
+          <button
+            onClick={() => document.getElementById("post-textarea").focus()}
+            className="flex-1 text-left px-4 py-2.5 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors text-sm md:text-base text-gray-500"
+          >
+            What's on your mind, {user?.name?.split(" ")[0] || "there"}?
+          </button>
+        </div>
+
+        {/* Text Area */}
+        <div className="px-4 md:px-6 pt-3">
           <textarea
+            id="post-textarea"
             value={newPost}
             onChange={(e) => setNewPost(e.target.value)}
-            placeholder="What new technology are you exploring today?"
-            className="flex-1 p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all resize-none bg-gray-50 w-full"
+            placeholder="Share your achievements, learnings, or ask for help..."
+            className="w-full p-0 border-none focus:outline-none focus:ring-0 text-sm md:text-base text-gray-800 resize-none bg-transparent placeholder:text-gray-400"
             rows="3"
+            style={{
+              minHeight: "60px",
+              maxHeight: "200px",
+            }}
+            onInput={(e) => {
+              e.target.style.height = "60px";
+              e.target.style.height = e.target.scrollHeight + "px";
+            }}
           />
         </div>
-        <div className="flex justify-end mt-4">
+
+        {/* Image Preview */}
+        {imagePreview && (
+          <div className="px-4 md:px-6 pb-3">
+            <div className="relative inline-block w-full max-w-md rounded-xl overflow-hidden border-2 border-gray-200">
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="w-full h-auto max-h-80 object-cover"
+              />
+              <button
+                onClick={handleRemoveImage}
+                className="absolute top-2 right-2 bg-gray-900 bg-opacity-70 hover:bg-opacity-90 text-white rounded-full p-1.5 transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Actions Row */}
+        <div className="px-4 md:px-6 py-3 border-t border-gray-100 flex items-center justify-between">
+          <label className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors group">
+            <ImagePlus className="w-4 h-4 md:w-5 md:h-5 text-green-600 group-hover:scale-110 transition-transform" />
+            <span className="text-xs md:text-sm font-medium text-gray-700 hidden sm:inline">
+              Photo
+            </span>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="hidden"
+            />
+          </label>
+
           <Button
             variant="primary"
-            className={`text-sm ${
-              submitting ? "opacity-60 cursor-not-allowed" : ""
+            className={`text-xs md:text-sm px-4 md:px-6 py-2 rounded-lg font-semibold transition-all ${
+              submitting || (!newPost.trim() && !imageFile)
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:shadow-md"
             }`}
             onClick={handlePostSubmit}
-            disabled={submitting}
+            disabled={submitting || (!newPost.trim() && !imageFile)}
           >
-            {submitting ? "Posting..." : "Post Update"}
+            {submitting ? (
+              <span className="flex items-center gap-2">
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                Posting...
+              </span>
+            ) : (
+              "Post"
+            )}
           </Button>
         </div>
       </div>
 
       {/* Posts List */}
-      <div className="flex flex-col gap-6 w-full">
-        {loading
-          ? Array.from({ length: 3 }).map((_, idx) => (
-              <div
-                key={idx}
-                className="animate-pulse bg-white p-6 rounded-2xl shadow-sm border border-gray-100"
-              >
-                <div className="h-4 bg-gray-200 rounded w-1/3 mb-4"></div>
-                <div className="h-3 bg-gray-200 rounded w-2/3 mb-2"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+      <div className="flex flex-col gap-4 md:gap-6 w-full pb-6">
+        {loading ? (
+          Array.from({ length: 3 }).map((_, idx) => (
+            <div
+              key={idx}
+              className="animate-pulse bg-white p-6 rounded-2xl shadow-sm border border-gray-200"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
+                <div className="flex-1">
+                  <div className="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                </div>
               </div>
-            ))
-          : posts.length > 0
-          ? posts.map((post) => (
-              <PostCard
-                key={post._id}
-                post={{
-                  ...post,
-                  name: post.userId?.name || "Unknown",
-                  avatarInitials: post.userId?.name
-                    ? post.userId.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")
-                    : "U",
-                  profilePhoto: post.userId?.profilePhoto || null,
-                  comments: post.comments?.length || 0,
-                }}
-              />
-            ))
-          : (
-            <div className="text-center text-gray-500 mt-10">
-              No posts yet. Be the first to share something!
+              <div className="h-3 bg-gray-200 rounded w-2/3 mb-2"></div>
+              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
             </div>
-          )}
+          ))
+        ) : posts.length > 0 ? (
+          posts.map((post) => (
+            <PostCard
+              key={post._id}
+              post={post}
+              currentUserId={user?._id}
+              onDelete={handleDeletePost}
+              onUpdate={handleUpdatePost}
+            />
+          ))
+        ) : (
+          <div className="text-center mt-10 py-12 bg-white rounded-2xl border border-gray-200">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ImagePlus className="w-8 h-8 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              No posts yet
+            </h3>
+            <p className="text-sm text-gray-600">
+              Be the first to share something with the community!
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

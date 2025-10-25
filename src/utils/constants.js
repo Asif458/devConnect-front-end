@@ -1,21 +1,20 @@
-import { Home, Users, BookOpen, Clock, Mail, LayoutGrid, User } from 'lucide-react';
+import { Home, Search, CalendarPlus, CalendarCheck, MessageSquare, Users, User } from "lucide-react";
 
 // --- THEME CONSTANTS ---
 export const PRIMARY_COLOR = '#032f60'; // Dark Blue
 export const ACCENT_COLOR = '#FFC107'; // Gold/Premium
 
-// --- SIDEBAR NAVIGATION DATA ---
-export const sidebarItems = [
-  // The 'slug' is used for internal mapping and setting the active state
-  { id: 1, slug: 'feed', name: 'Home / Feed', icon: Home, isActive: true },
-  { id: 2, slug: 'find', name: 'Find Mentors / Users', icon: Users, isActive: false },
-  { id: 3, slug: 'book', name: 'Book Mentorship', icon: BookOpen, isActive: false },
-  { id: 4, slug: 'bookings', name: 'My Bookings', icon: Clock, isActive: false },
-  { id: 5, slug: 'messages', name: 'Messages', icon: Mail, isActive: false },
-  { id: 6, slug: 'groups', name: 'Groups', icon: LayoutGrid, isActive: false },
-  { id: 7, slug: 'profile', name: 'Profile', icon: User, isActive: false },
-];
 
+
+export const sidebarItems = [
+  { slug: "feed", name: "Feed", icon: Home },
+  { slug: "find", name: "Find", icon: Search },
+  { slug: "book", name: "Book", icon: CalendarPlus },
+  { slug: "bookings", name: "Bookings", icon: CalendarCheck },
+  { slug: "messages", name: "Messages", icon: MessageSquare },
+  { slug: "groups", name: "Groups", icon: Users },
+  { slug: "profile", name: "Profile", icon: User },
+];
 // --- TAG COLOR UTILITY ---
 const TAG_COLORS = [
   'bg-blue-100 text-blue-800 border-blue-200',
