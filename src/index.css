@@ -1,21 +1,34 @@
 @import "tailwindcss";
 
-/* Clean, simple styles for desktop landscape layout */
+/* Prevent scrollbar issues */
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
 
-/* Simple, clean scrollbar */
+/* Custom minimal scrollbar styling */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 3px;
+  background: #cbd5e1;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: #94a3b8;
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
 }

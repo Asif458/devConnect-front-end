@@ -1,14 +1,12 @@
-import { createContext, useContext, useState, useEffect, useRef } from "react";
+import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 import api from "../api/axios";
-import React from "react";
 
 const AuthContext = createContext();
 
-// Helper: unify mentor status
 const getMentorStatus = (user) => {
-  if (!user || !user.role) return "pending";       // completely null user
-  if (user.role !== "mentor") return "approved";  // developer/admin
-  return user.status || "pending";                // mentor status
+  if (!user || !user.role) return "pending";
+  if (user.role !== "mentor") return "approved";
+  return user.status || "pending";
 };
 
 export const AuthProvider = ({ children }) => {
@@ -16,11 +14,10 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const pollingRef = useRef(null);
 
-  // Fetch & update profile
   const fetchUserProfile = async () => {
     try {
       const res = await api.get("/auth/profile", { withCredentials: true });
-      const fetchedUser = res.data.user || null;
+      const fetchedUser = res?.data?.user || null;
       if (!fetchedUser) {
         setUser(null);
         return;
@@ -35,12 +32,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Check login on mount
+  // run once on mount
   useEffect(() => {
     fetchUserProfile();
   }, []);
 
-  // Poll profile every 10s if mentor is pending
+  // poll only while mentor pending
   useEffect(() => {
     if (user?.role === "mentor" && user?.status === "pending") {
       if (!pollingRef.current) {
@@ -58,17 +55,16 @@ export const AuthProvider = ({ children }) => {
         pollingRef.current = null;
       }
     };
+    // only depend on role/status
   }, [user?.role, user?.status]);
 
-  // SIGNUP
   const signup = async (formData) => {
     try {
       const res = await api.post("/auth/signup", formData, {
         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
       });
-
-      const newUser = res.data.user || null;
+      const newUser = res?.data?.user || null;
       if (!newUser) throw new Error("Signup failed: no user returned");
       newUser.status = getMentorStatus(newUser);
       setUser(newUser);
@@ -79,11 +75,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // LOGIN
   const login = async (values) => {
     try {
       const res = await api.post("/auth/login", values, { withCredentials: true });
-      const loggedUser = res.data.user || null;
+      const loggedUser = res?.data?.user || null;
       if (!loggedUser) throw new Error("Login failed: no user returned");
       loggedUser.status = getMentorStatus(loggedUser);
       setUser(loggedUser);
@@ -94,7 +89,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // LOGOUT
   const logout = async () => {
     try {
       await api.post("/auth/logout", {}, { withCredentials: true });
