@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ImagePlus, Trash2 } from "lucide-react";
-import Modal from "../components/Modal";
+import Modal from "../Modal";
 
 const EditPostModal = ({ 
   isOpen, 

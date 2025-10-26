@@ -4,17 +4,27 @@ import { Home, Search, CalendarPlus, CalendarCheck, MessageSquare, Users, User }
 export const PRIMARY_COLOR = '#032f60'; // Dark Blue
 export const ACCENT_COLOR = '#FFC107'; // Gold/Premium
 
-
+ 
 
 export const sidebarItems = [
-  { slug: "feed", name: "Feed", icon: Home },
-  { slug: "find", name: "Find", icon: Search },
-  { slug: "book", name: "Book", icon: CalendarPlus },
-  { slug: "bookings", name: "Bookings", icon: CalendarCheck },
-  { slug: "messages", name: "Messages", icon: MessageSquare },
-  { slug: "groups", name: "Groups", icon: Users },
-  { slug: "profile", name: "Profile", icon: User },
+  { name: "Home / Feed", slug: "feed" },
+  { name: "Find Mentors/Developers", slug: "find" },
+  { name: "Book Mentorship", slug: "book" },
+  { name: "My Bookings", slug: "bookings" },
+  { name: "Messages", slug: "messages" },
+  { name: "Groups", slug: "groups" },
+  { name: "Profile", slug: "profile" },
 ];
+
+export const mentorSidebarItems = [
+  { name: "Dashboard", slug: "dashboard" },
+  { name: "Connection Requests", slug: "requests" },
+  { name: "My Students", slug: "students" },
+  { name: "Sessions", slug: "sessions" },
+  { name: "Messages", slug: "messages" },
+  { name: "Profile", slug: "profile" },
+];
+
 // --- TAG COLOR UTILITY ---
 const TAG_COLORS = [
   'bg-blue-100 text-blue-800 border-blue-200',

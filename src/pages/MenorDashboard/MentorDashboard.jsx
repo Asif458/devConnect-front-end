@@ -1,8 +1,8 @@
 // pages/MentorDashboard.jsx
 import React from "react";
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../context/authContext";
-import PendingApproval from "./PendingApproval";
+import { useAuth } from "../../context/authContext";
+import PendingApproval from "../PendingApproval";
 
 export default function MentorDashboard() {
   const { user, loading } = useAuth(); // ✅ correct destructuring

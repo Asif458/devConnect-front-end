@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 
 import HomeFeed from "./HomeFeed";
+import FindMentorsUsers from "./FindMentorsUsers";
+import MyProfilePage from "../Profile/MyProfilePag";  
 import SidebarLink from "./components/SideBar";
 import { PRIMARY_COLOR, sidebarItems } from "../../utils/constants";
 import Button from "../../components/Button";
@@ -24,7 +26,6 @@ export default function DeveloperDashboard() {
   const [activeSlug, setActiveSlug] = useState("feed");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // Map icons dynamically
   const sidebarItemMap = sidebarItems.map((item) => ({
     ...item,
     icon:
@@ -48,7 +49,10 @@ export default function DeveloperDashboard() {
       >
         <div className="flex items-center mb-10 p-4">
           <div className="w-12 h-12 rounded-full bg-white mr-4 flex items-center justify-center shadow-md">
-            <span className="font-semibold text-lg" style={{ color: "#043873" }}>
+            <span
+              className="font-semibold text-lg"
+              style={{ color: "#043873" }}
+            >
               DC
             </span>
           </div>
@@ -157,8 +161,10 @@ export default function DeveloperDashboard() {
         <main className="flex-1 overflow-y-auto bg-gray-100 min-h-0">
           <div className="p-6">
             {activeSlug === "feed" && <HomeFeed />}
-            
-            {activeSlug !== "feed" && (
+            {activeSlug === "find" && <FindMentorsUsers />}
+            {activeSlug === "profile" && <MyProfilePage />}
+
+            {!["feed", "find", "profile"].includes(activeSlug) && (
               <div
                 className="p-10 text-center bg-white rounded-xl shadow-lg mt-4"
                 style={{ color: "#043873" }}

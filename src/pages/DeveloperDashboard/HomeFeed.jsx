@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ImagePlus, X } from "lucide-react";
-import PostCard from "./components/PostCard";
+import PostCard from "./components/postcard/PostCard";
 import Button from "../../components/Button";
 import api from "../../api/axios";
 import { useAuth } from "../../context/authContext";
@@ -11,37 +11,26 @@ export default function HomeFeed() {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
+  // Fetch posts on mount
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const res = await api.get("/post");
-        setPosts(res.data.posts || []);
-      } catch (err) {
-        console.error("Error fetching posts:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPosts();
+    api.get("/post")
+      .then(res => setPosts(res.data.posts || []))
+      .catch(err => console.error("Error fetching posts:", err));
   }, []);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     if (file.size > 5 * 1024 * 1024) {
       alert("Image size should be less than 5MB");
       return;
     }
-
     if (!file.type.startsWith("image/")) {
       alert("Please select an image file");
       return;
     }
-
     setImageFile(file);
     const reader = new FileReader();
     reader.onloadend = () => setImagePreview(reader.result);
@@ -60,18 +49,13 @@ export default function HomeFeed() {
     try {
       const formData = new FormData();
       formData.append("content", newPost);
-
       if (imageFile) {
         formData.append("image", imageFile);
       }
-
       const res = await api.post("/post", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+        headers: { "Content-Type": "multipart/form-data" },
       });
-
-      setPosts((prev) => [res.data, ...prev]);
+      setPosts(prev => [res.data, ...prev]);
       setNewPost("");
       setImageFile(null);
       setImagePreview(null);
@@ -84,31 +68,23 @@ export default function HomeFeed() {
   };
 
   const handleDeletePost = (postId) => {
-    setPosts((prev) => prev.filter((post) => post._id !== postId));
+    setPosts(prev => prev.filter(post => post._id !== postId));
   };
 
   const handleUpdatePost = (updatedPost) => {
-    setPosts((prev) =>
-      prev.map((post) => (post._id === updatedPost._id ? updatedPost : post))
-    );
+    setPosts(prev => prev.map(post => (post._id === updatedPost._id ? updatedPost : post)));
   };
 
   const getUserInitials = () => {
     if (!user?.name) return "U";
-    return user.name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase();
+    return user.name.split(" ").map(n => n[0]).join("").toUpperCase();
   };
 
   return (
     <div className="flex flex-col w-full">
       {/* Header */}
       <div className="mb-6 w-full">
-        <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
-          Community Feed
-        </h2>
+        <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Community Feed</h2>
         <p className="text-sm md:text-base text-gray-600 mt-1">
           Share your thoughts with developers and mentors
         </p>
@@ -124,7 +100,7 @@ export default function HomeFeed() {
                 src={user.profilePhoto}
                 alt={user.name}
                 className="w-full h-full object-cover"
-                onError={(e) => {
+                onError={e => {
                   e.target.onerror = null;
                   e.target.style.display = "none";
                   e.target.parentElement.textContent = getUserInitials();
@@ -147,15 +123,12 @@ export default function HomeFeed() {
           <textarea
             id="post-textarea"
             value={newPost}
-            onChange={(e) => setNewPost(e.target.value)}
+            onChange={e => setNewPost(e.target.value)}
             placeholder="Share your achievements, learnings, or ask for help..."
             className="w-full p-0 border-none focus:outline-none focus:ring-0 text-sm md:text-base text-gray-800 resize-none bg-transparent placeholder:text-gray-400"
-            rows="3"
-            style={{
-              minHeight: "60px",
-              maxHeight: "200px",
-            }}
-            onInput={(e) => {
+            rows={3}
+            style={{ minHeight: 60, maxHeight: 200 }}
+            onInput={e => {
               e.target.style.height = "60px";
               e.target.style.height = e.target.scrollHeight + "px";
             }}
@@ -185,60 +158,27 @@ export default function HomeFeed() {
         <div className="px-4 md:px-6 py-3 border-t border-gray-100 flex items-center justify-between">
           <label className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors group">
             <ImagePlus className="w-4 h-4 md:w-5 md:h-5 text-green-600 group-hover:scale-110 transition-transform" />
-            <span className="text-xs md:text-sm font-medium text-gray-700 hidden sm:inline">
-              Photo
-            </span>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="hidden"
-            />
+            <span className="text-xs md:text-sm font-medium text-gray-700 hidden sm:inline">Photo</span>
+            <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
           </label>
 
           <Button
             variant="primary"
             className={`text-xs md:text-sm px-4 md:px-6 py-2 rounded-lg font-semibold transition-all ${
-              submitting || (!newPost.trim() && !imageFile)
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:shadow-md"
+              (!newPost.trim() && !imageFile) ? "opacity-50 cursor-not-allowed" : "hover:shadow-md"
             }`}
             onClick={handlePostSubmit}
-            disabled={submitting || (!newPost.trim() && !imageFile)}
+            disabled={!newPost.trim() && !imageFile}
           >
-            {submitting ? (
-              <span className="flex items-center gap-2">
-                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                Posting...
-              </span>
-            ) : (
-              "Post"
-            )}
+            Post
           </Button>
         </div>
       </div>
 
       {/* Posts List */}
       <div className="flex flex-col gap-4 md:gap-6 w-full pb-6">
-        {loading ? (
-          Array.from({ length: 3 }).map((_, idx) => (
-            <div
-              key={idx}
-              className="animate-pulse bg-white p-6 rounded-2xl shadow-sm border border-gray-200"
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
-                <div className="flex-1">
-                  <div className="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/4"></div>
-                </div>
-              </div>
-              <div className="h-3 bg-gray-200 rounded w-2/3 mb-2"></div>
-              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-            </div>
-          ))
-        ) : posts.length > 0 ? (
-          posts.map((post) => (
+        {posts.length > 0 ? (
+          posts.map(post => (
             <PostCard
               key={post._id}
               post={post}
@@ -252,12 +192,8 @@ export default function HomeFeed() {
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <ImagePlus className="w-8 h-8 text-gray-400" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              No posts yet
-            </h3>
-            <p className="text-sm text-gray-600">
-              Be the first to share something with the community!
-            </p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No posts yet</h3>
+            <p className="text-sm text-gray-600">Be the first to share something with the community!</p>
           </div>
         )}
       </div>

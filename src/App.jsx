@@ -1,15 +1,17 @@
+import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import PrivateRoute from "./components/PrivateRoute";
+
 import DeveloperDashboard from "./pages/DeveloperDashboard/Index";
-import MentorDashboard from "./pages/MentorDashboard";
+import MentorDashboard from "./pages/MenorDashboard/MentorDashboard";
+import AdminDashboard from "./pages/AdminDashboard/Index";
+
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
 import LandingPage from "./pages/LandingPage";
-import PendingApproval from "./pages/PendingApproval"; // NEW
-
-import React from "react";
-import AdminDashboard from "./pages/AdminDashboard/Index";
+import PendingApproval from "./pages/PendingApproval";
+import ProfilePage from "./pages/Profile/ProfilePage";
 
 function App() {
   return (
@@ -24,10 +26,10 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgotpassword" element={<ForgotPassword />} />
 
-        {/* Pending Approval page */}
+        {/* Pending Approval Page */}
         <Route path="/pending-approval" element={<PendingApproval />} />
 
-        {/* Protected dashboards */}
+        {/* Protected Dashboards */}
         <Route
           path="/developer-dashboard"
           element={
@@ -36,7 +38,6 @@ function App() {
             </PrivateRoute>
           }
         />
-
         <Route
           path="/mentor-dashboard"
           element={
@@ -45,12 +46,19 @@ function App() {
             </PrivateRoute>
           }
         />
-
         <Route
           path="/admin-dashboard"
           element={
             <PrivateRoute role="admin">
               <AdminDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/profile/:id"
+          element={
+            <PrivateRoute role={["developer", "mentor"]}>
+              <ProfilePage />
             </PrivateRoute>
           }
         />
