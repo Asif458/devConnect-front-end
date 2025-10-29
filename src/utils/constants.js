@@ -4,18 +4,19 @@ import { Home, Search, CalendarPlus, CalendarCheck, MessageSquare, Users, User }
 export const PRIMARY_COLOR = '#032f60'; // Dark Blue
 export const ACCENT_COLOR = '#FFC107'; // Gold/Premium
 
- 
-
+// --- SIDEBAR ITEMS (Developer Dashboard) ---
 export const sidebarItems = [
   { name: "Home / Feed", slug: "feed" },
   { name: "Find Mentors/Developers", slug: "find" },
-  { name: "Book Mentorship", slug: "book" },
+  { name: "Connections", slug: "Connections" },
+  { name: "Book Mentorship", slug: "book" },   // (Book feature included here)
   { name: "My Bookings", slug: "bookings" },
   { name: "Messages", slug: "messages" },
   { name: "Groups", slug: "groups" },
   { name: "Profile", slug: "profile" },
 ];
 
+// --- MENTOR SIDEBAR ITEMS (for Mentor Dashboard, if used) ---
 export const mentorSidebarItems = [
   { name: "Dashboard", slug: "dashboard" },
   { name: "Connection Requests", slug: "requests" },
@@ -38,7 +39,6 @@ const TAG_COLORS = [
 export const getTagColor = (index) => {
   return TAG_COLORS[index % TAG_COLORS.length];
 };
-
 
 // --- MOCK POST DATA ---
 export const mockPosts = [

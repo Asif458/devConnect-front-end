@@ -1,7 +1,14 @@
 import React, { useState } from "react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import api from "../../../../api/axios";
+import {
+  toggleLikePost,
+  reportPost,
+  deletePost as apiDeletePost,
+  updatePost,
+  addComment,
+  deleteComment as apiDeleteComment
+} from "../../../../api/postsApi";
 import EditPostModal from "../postcard/EditPostModal";
 import PostHeader from "../postcard/PostHeader";
 import PostSkills from "../postcard/PostSkills";
@@ -46,7 +53,7 @@ const PostCard = ({ post, currentUserId, onDelete, onUpdate }) => {
   // Handlers
   const handleLike = async () => {
     try {
-      const res = await api.post(`/post/${_id}/like`);
+      const res = await toggleLikePost(_id);
       setLiked(res.data.liked);
       setLikeCount(res.data.likes);
     } catch (err) {
@@ -57,7 +64,7 @@ const PostCard = ({ post, currentUserId, onDelete, onUpdate }) => {
   const handleReport = async () => {
     if (!window.confirm("Are you sure you want to report this post?")) return;
     try {
-      await api.post(`/post/${_id}/report`);
+      await reportPost(_id);
       setReportCount((prev) => prev + 1);
       alert("Post reported successfully! Our team will review it.");
     } catch (err) {
@@ -69,7 +76,7 @@ const PostCard = ({ post, currentUserId, onDelete, onUpdate }) => {
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this post?")) return;
     try {
-      await api.delete(`/post/${_id}`);
+      await apiDeletePost(_id);
       if (onDelete) onDelete(_id);
       alert("Post deleted successfully!");
     } catch (err) {
@@ -80,14 +87,7 @@ const PostCard = ({ post, currentUserId, onDelete, onUpdate }) => {
 
   const handleUpdatePost = async (updatedContent, updatedImage) => {
     try {
-      const formData = new FormData();
-      formData.append("content", updatedContent);
-      if (updatedImage && updatedImage instanceof File) {
-        formData.append("image", updatedImage);
-      }
-      const res = await api.put(`/post/${_id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const res = await updatePost(_id, updatedContent, updatedImage);
       setPostContent(res.data.content);
       setPostImage(res.data.mediaUrls?.[0] || null);
       if (onUpdate) onUpdate(res.data);
@@ -102,7 +102,7 @@ const PostCard = ({ post, currentUserId, onDelete, onUpdate }) => {
   const handleAddComment = async () => {
     if (!commentText.trim()) return;
     try {
-      const res = await api.post(`/post/${_id}/comment`, { text: commentText });
+      const res = await addComment(_id, commentText);
       setComments((prev) => [...prev, res.data]);
       setCommentText("");
       setShowCommentInput(false);
@@ -114,7 +114,7 @@ const PostCard = ({ post, currentUserId, onDelete, onUpdate }) => {
   const handleDeleteComment = async (commentId) => {
     if (!window.confirm("Delete this comment?")) return;
     try {
-      await api.delete(`/post/${_id}/comment/${commentId}`);
+      await apiDeleteComment(_id, commentId);
       setComments((prev) => prev.filter((c) => c._id !== commentId));
     } catch (err) {
       console.error("Error deleting comment:", err);
@@ -123,8 +123,8 @@ const PostCard = ({ post, currentUserId, onDelete, onUpdate }) => {
   };
 
   return (
-    <>
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 transition-all hover:shadow-md w-full">
+    <><div className="bg-white rounded-2xl shadow-sm border border-gray-200 hover:shadow-md max-w-4xl w-full p-6 mx-auto">
+
         <PostHeader
           userId={userId}
           timeAgo={timeAgo}
@@ -135,15 +135,12 @@ const PostCard = ({ post, currentUserId, onDelete, onUpdate }) => {
         />
 
         <PostSkills skills={userId?.skills} />
-
         <PostContent content={postContent} />
-
         <PostImage
           imageUrl={postImage}
           showFullImage={showFullImage}
           setShowFullImage={setShowFullImage}
         />
-
         <PostHashtags hashtags={hashtags} />
 
         <PostInteractions

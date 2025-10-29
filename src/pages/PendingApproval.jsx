@@ -1,10 +1,11 @@
 import React from "react";
-import { useAuth } from "../context/authContext";
+import useAuthStore from "../ZustandStore/useAuthStore";
 
 export default function PendingApproval() {
-  const { user } = useAuth();
+  const { user, loading } = useAuthStore();
 
-  if (!user) return <div>Loading...</div>;
+  if (loading) return <div>Loading...</div>;
+  if (!user) return <div>User not found.</div>;
 
   const pending = user.status === "pending";
   const rejected = user.status === "rejected";

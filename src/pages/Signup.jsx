@@ -5,9 +5,10 @@ import * as Yup from "yup";
 import InputField from "../components/InputField";
 import SelectDropdown from "../components/SelectDropdown";
 import Button from "../components/Button";
-import { useAuth } from "../context/authContext";
 import { useNavigate } from "react-router-dom";
-import api from "../api/axios"; // axios instance
+import useAuthStore from "../ZustandStore/useAuthStore";
+import toast, { Toaster } from "react-hot-toast"; // ✅ correct import
+import api from "../api/axios";
 
 const roleOptions = [
   { value: "developer", label: "Developer" },
@@ -42,7 +43,7 @@ const OTPSchema = Yup.object().shape({
 });
 
 export default function Signup() {
-  const { signup } = useAuth(); // use signup from context
+  const signup = useAuthStore((state) => state.signup);
   const navigate = useNavigate();
   const [showOtp, setShowOtp] = useState(false);
   const [userEmail, setUserEmail] = useState("");
@@ -51,8 +52,6 @@ export default function Signup() {
   const handleSubmit = async (values, { setSubmitting, setErrors }) => {
     try {
       const formData = new FormData();
-
-      // Core fields
       formData.append("name", values.name);
       formData.append("username", values.username);
       formData.append("email", values.email);
@@ -74,13 +73,13 @@ export default function Signup() {
 
       if (values.profilePhoto) formData.append("profilePhoto", values.profilePhoto);
 
-      // Call context signup → backend sends OTP
       await signup(formData);
-
+      toast.success("OTP sent successfully! Please check your email."); // ✅ success toast
       setUserEmail(values.email);
       setShowOtp(true);
     } catch (error) {
       console.error("Signup failed:", error);
+      toast.error(error.response?.data?.message || "Signup failed!"); // ✅ error toast
       setErrors({
         email: error.response?.data?.message || error.message || "Signup failed",
       });
@@ -92,10 +91,10 @@ export default function Signup() {
   const handleVerifyOtp = async (values, { setSubmitting }) => {
     try {
       await api.post("/auth/verify-otp", { email: userEmail, otp: values.otp });
-
-      alert("Signup verified successfully! Please login.");
+      toast.success("Signup verified successfully! Please login."); // ✅ toast on success
       navigate("/login");
     } catch (error) {
+      toast.error(error.response?.data?.message || "Invalid OTP"); // ✅ toast for error
       setOtpError(error.response?.data?.message || "Invalid OTP");
     } finally {
       setSubmitting(false);
@@ -104,6 +103,7 @@ export default function Signup() {
 
   return (
     <div className="h-screen bg-gray-50 flex items-center justify-center font-sans overflow-hidden">
+      <Toaster position="top-right" reverseOrder={false} /> {/* ✅ working toaster */}
       <div className="w-full max-w-5xl h-[90vh] max-h-[700px] flex flex-col md:flex-row bg-white shadow-2xl rounded-2xl m-4 overflow-visible">
         {/* Branding Panel */}
         <div className="w-full md:w-2/5 bg-[#043873] text-white p-10 flex flex-col justify-center items-center md:items-start text-center md:text-left rounded-l-2xl">
@@ -256,16 +256,13 @@ export default function Signup() {
                 </div>
               </>
             ) : (
-              // OTP Verification Form
               <div className="max-w-md mx-auto w-full">
                 <h2 className="text-3xl font-bold text-gray-900 mb-2">Verify Your Email</h2>
-                <p className="text-gray-600 mb-6">An OTP was sent to <span className="font-semibold">{userEmail}</span>.</p>
+                <p className="text-gray-600 mb-6">
+                  An OTP was sent to <span className="font-semibold">{userEmail}</span>.
+                </p>
 
-                <Formik
-                  initialValues={{ otp: "" }}
-                  validationSchema={OTPSchema}
-                  onSubmit={handleVerifyOtp}
-                >
+                <Formik initialValues={{ otp: "" }} validationSchema={OTPSchema} onSubmit={handleVerifyOtp}>
                   {({ isSubmitting }) => (
                     <Form className="space-y-4">
                       <InputField label="6-Digit OTP" name="otp" icon={KeyRound} />

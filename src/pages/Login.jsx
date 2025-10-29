@@ -4,20 +4,21 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import Button from "../components/Button";
 import InputField from "../components/InputField";
-import { useAuth } from "../context/authContext";
+import useAuthStore  from "../ZustandStore/useAuthStore";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
-//   Validation Schema
+// Validation Schema
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Email is required"),
   password: Yup.string().required("Password is required"),
 });
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login } = useAuthStore();
   const navigate = useNavigate();
 
-  //   Role-based redirect logic
+  // Role-based redirect logic
   const redirectByRole = (role) => {
     switch (role) {
       case "developer":
@@ -36,10 +37,12 @@ export default function Login() {
 
   const handleSubmit = async (values, { setSubmitting, setErrors }) => {
     try {
-      const user = await login(values); 
-      redirectByRole(user.role); // redirect based on role
+      const user = await login(values);
+      toast.success("Login successful!");
+      redirectByRole(user.role);
     } catch (error) {
       console.error(error);
+      toast.error(error.response?.data?.message || "Invalid credentials");
       setErrors({
         email: error.response?.data?.message || "Invalid credentials",
       });

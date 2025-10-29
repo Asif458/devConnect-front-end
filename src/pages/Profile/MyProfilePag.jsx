@@ -1,22 +1,25 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
-import { useAuth } from "../../context/authContext";
+import { toast } from "react-hot-toast";
+import useAuthStore  from "../../ZustandStore/useAuthStore";
 import { getUserProfile, updateUserProfile } from "../../api/users";
 import PostCard from "../DeveloperDashboard/components/postcard/PostCard";
 import Modal from "../DeveloperDashboard/components/Modal";
 import EditProfileModalContent from "./components/EditProfileModalContent";
-import ProfileAvatar from "../../components/ProfileAvatar/ProfileAvatar";  
+import ProfileAvatar from "../../components/ProfileAvatar/ProfileAvatar";
 
 const HEADER_COLOR = "#032f60";
 
 export default function MyProfilePage() {
-  const { user, setUser } = useAuth();
-  const [profile, setProfile] = useState(null);
+  const { user, setUser } = useAuthStore();
+  const [profile, setProfile] = useState(user || null);
   const [editOpen, setEditOpen] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  // load latest profile
   useEffect(() => {
     if (!user) return;
+    setProfile(user);
     getUserProfile(user._id).then(setProfile);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?._id]);
@@ -27,9 +30,11 @@ export default function MyProfilePage() {
       const updated = await updateUserProfile(user._id, form);
       setUser(updated);
       setEditOpen(false);
-      setProfile(await getUserProfile(user._id));
+      const fresh = await getUserProfile(user._id);
+      setProfile(fresh);
+      toast.success("Profile updated successfully ✅");
     } catch (err) {
-      alert("Failed to save changes");
+      toast.error("Failed to save changes ❌");
     } finally {
       setSaving(false);
     }
@@ -39,14 +44,16 @@ export default function MyProfilePage() {
     if (!dateStr) return "";
     const created = new Date(dateStr);
     const now = new Date();
-    const diffTime = now - created;
-    if (isNaN(diffTime)) return "";
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
+    const diffDays = Math.floor((now - created) / (1000 * 60 * 60 * 24));
+    return isNaN(diffDays) ? "" : diffDays;
   }
 
   if (!profile)
-    return <div className="p-10 text-center text-xl text-[#032f60] font-semibold">Loading...</div>;
+    return (
+      <div className="p-10 text-center text-xl text-[#032f60] font-semibold">
+        Loading...
+      </div>
+    );
 
   return (
     <>
@@ -63,8 +70,6 @@ export default function MyProfilePage() {
       {/* Profile Top */}
       <div className="relative rounded-3xl bg-gradient-to-br from-[#032f60] to-blue-800 shadow mb-10 h-56 text-white">
         <div className="absolute left-8 -bottom-16">
-           {console.log("Profile data:", profile)}
-
           <ProfileAvatar
             photo={profile.profilePhoto}
             name={profile.name}
@@ -74,7 +79,9 @@ export default function MyProfilePage() {
         <div className="pl-56 flex items-end justify-between h-full">
           <div className="pt-14 pb-6">
             <div className="font-extrabold text-3xl mb-1">{profile.name}</div>
-            <div className="text-lg font-medium opacity-90">@{profile.username || profile.email}</div>
+            <div className="text-lg font-medium opacity-90">
+              @{profile.username || profile.email}
+            </div>
             <div className="mt-2 text-xs text-gray-200 italic">
               {profile.createdAt
                 ? daysAgo(profile.createdAt) === 0
@@ -104,14 +111,18 @@ export default function MyProfilePage() {
       <div className="mb-6 bg-white rounded-2xl shadow px-8 py-6">
         <div className="font-bold text-lg text-[#032f60] mb-1">About</div>
         <div className="text-gray-800">
-          {profile.bio || <span className="text-gray-400">No bio provided.</span>}
+          {profile.bio || (
+            <span className="text-gray-400">No bio provided.</span>
+          )}
         </div>
       </div>
 
       {/* Skills */}
       <div className="mb-6 bg-white rounded-2xl shadow px-8 py-6">
         <div className="flex justify-between items-center mb-2">
-          <div className="font-bold text-lg text-[#032f60]">Skills & Technologies</div>
+          <div className="font-bold text-lg text-[#032f60]">
+            Skills & Technologies
+          </div>
         </div>
         <div className="flex flex-wrap gap-2 mt-2">
           {profile.skills && profile.skills.length > 0 ? (
@@ -122,8 +133,7 @@ export default function MyProfilePage() {
               >
                 {typeof skill === "string"
                   ? skill
-                  : (skill && (skill.name || skill.label))
-                  || "Skill"}
+                  : (skill && (skill.name || skill.label)) || "Skill"}
               </span>
             ))
           ) : (
@@ -146,7 +156,8 @@ export default function MyProfilePage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[#032f60] underline break-all font-medium"
-                >{l.label || l.url}
+                >
+                  {l.label || l.url}
                 </a>
               </li>
             ))
@@ -162,11 +173,7 @@ export default function MyProfilePage() {
         {profile.recentPosts && profile.recentPosts.length > 0 ? (
           <div className="flex flex-col gap-5">
             {profile.recentPosts.map((post) => (
-              <PostCard
-                key={post._id}
-                post={post}
-                currentUserId={user._id}
-              />
+              <PostCard key={post._id} post={post} currentUserId={user._id} />
             ))}
           </div>
         ) : (

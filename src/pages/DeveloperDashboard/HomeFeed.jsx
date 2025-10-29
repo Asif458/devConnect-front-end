@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import { ImagePlus, X } from "lucide-react";
 import PostCard from "./components/postcard/PostCard";
 import Button from "../../components/Button";
-import api from "../../api/axios";
-import { useAuth } from "../../context/authContext";
+import useAuthStore from "../../ZustandStore/useAuthStore";
+import { toast } from "react-hot-toast";
+import { getPosts, createPost } from "../../api/postsApi";
 
 export default function HomeFeed() {
-  const { user } = useAuth();
+  const { user } = useAuthStore();
   const [newPost, setNewPost] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -15,22 +16,25 @@ export default function HomeFeed() {
 
   // Fetch posts on mount
   useEffect(() => {
-    api.get("/post")
-      .then(res => setPosts(res.data.posts || []))
-      .catch(err => console.error("Error fetching posts:", err));
+    getPosts()
+      .then((res) => setPosts(res.data.posts || []))
+      .catch(() => toast.error("Failed to fetch posts"));
   }, []);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
     if (file.size > 5 * 1024 * 1024) {
-      alert("Image size should be less than 5MB");
+      toast.error("Image size should be less than 5MB");
       return;
     }
+
     if (!file.type.startsWith("image/")) {
-      alert("Please select an image file");
+      toast.error("Please select an image file");
       return;
     }
+
     setImageFile(file);
     const reader = new FileReader();
     reader.onloadend = () => setImagePreview(reader.result);
@@ -49,50 +53,58 @@ export default function HomeFeed() {
     try {
       const formData = new FormData();
       formData.append("content", newPost);
-      if (imageFile) {
-        formData.append("image", imageFile);
-      }
-      const res = await api.post("/post", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      setPosts(prev => [res.data, ...prev]);
+      if (imageFile) formData.append("image", imageFile);
+
+      const res = await createPost(formData);
+      setPosts((prev) => [res.data, ...prev]);
+
       setNewPost("");
       setImageFile(null);
       setImagePreview(null);
+      toast.success("Post created successfully!");
     } catch (err) {
-      console.error("Error creating post:", err.response?.data || err);
-      alert(`Failed to create post: ${err.response?.data?.error || err.message}`);
+      console.error("Error creating post:", err);
+      toast.error(err.response?.data?.error || "Failed to create post");
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDeletePost = (postId) => {
-    setPosts(prev => prev.filter(post => post._id !== postId));
+    setPosts((prev) => prev.filter((post) => post._id !== postId));
+    toast.success("Post deleted");
   };
 
   const handleUpdatePost = (updatedPost) => {
-    setPosts(prev => prev.map(post => (post._id === updatedPost._id ? updatedPost : post)));
+    setPosts((prev) =>
+      prev.map((post) => (post._id === updatedPost._id ? updatedPost : post))
+    );
+    toast.success("Post updated");
   };
 
   const getUserInitials = () => {
     if (!user?.name) return "U";
-    return user.name.split(" ").map(n => n[0]).join("").toUpperCase();
+    return user.name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
   };
 
   return (
     <div className="flex flex-col w-full">
       {/* Header */}
       <div className="mb-6 w-full">
-        <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Community Feed</h2>
+        <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+          Community Feed
+        </h2>
         <p className="text-sm md:text-base text-gray-600 mt-1">
           Share your thoughts with developers and mentors
         </p>
       </div>
 
-      {/* Modern Create Post Card */}
+      {/* Create Post Card */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 mb-6 w-full transition-all hover:shadow-md">
-        {/* User Info Row */}
         <div className="p-4 md:p-6 flex items-center gap-3 border-b border-gray-100">
           <div className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-sm md:text-base font-semibold text-white bg-gradient-to-br from-sky-400 to-blue-500 flex-shrink-0 overflow-hidden shadow-sm">
             {user?.profilePhoto ? (
@@ -100,7 +112,7 @@ export default function HomeFeed() {
                 src={user.profilePhoto}
                 alt={user.name}
                 className="w-full h-full object-cover"
-                onError={e => {
+                onError={(e) => {
                   e.target.onerror = null;
                   e.target.style.display = "none";
                   e.target.parentElement.textContent = getUserInitials();
@@ -118,24 +130,22 @@ export default function HomeFeed() {
           </button>
         </div>
 
-        {/* Text Area */}
         <div className="px-4 md:px-6 pt-3">
           <textarea
             id="post-textarea"
             value={newPost}
-            onChange={e => setNewPost(e.target.value)}
+            onChange={(e) => setNewPost(e.target.value)}
             placeholder="Share your achievements, learnings, or ask for help..."
             className="w-full p-0 border-none focus:outline-none focus:ring-0 text-sm md:text-base text-gray-800 resize-none bg-transparent placeholder:text-gray-400"
             rows={3}
             style={{ minHeight: 60, maxHeight: 200 }}
-            onInput={e => {
+            onInput={(e) => {
               e.target.style.height = "60px";
               e.target.style.height = e.target.scrollHeight + "px";
             }}
           />
         </div>
 
-        {/* Image Preview */}
         {imagePreview && (
           <div className="px-4 md:px-6 pb-3">
             <div className="relative inline-block w-full max-w-md rounded-xl overflow-hidden border-2 border-gray-200">
@@ -154,23 +164,31 @@ export default function HomeFeed() {
           </div>
         )}
 
-        {/* Actions Row */}
         <div className="px-4 md:px-6 py-3 border-t border-gray-100 flex items-center justify-between">
           <label className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors group">
             <ImagePlus className="w-4 h-4 md:w-5 md:h-5 text-green-600 group-hover:scale-110 transition-transform" />
-            <span className="text-xs md:text-sm font-medium text-gray-700 hidden sm:inline">Photo</span>
-            <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+            <span className="text-xs md:text-sm font-medium text-gray-700 hidden sm:inline">
+              Photo
+            </span>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="hidden"
+            />
           </label>
 
           <Button
             variant="primary"
             className={`text-xs md:text-sm px-4 md:px-6 py-2 rounded-lg font-semibold transition-all ${
-              (!newPost.trim() && !imageFile) ? "opacity-50 cursor-not-allowed" : "hover:shadow-md"
+              !newPost.trim() && !imageFile
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:shadow-md"
             }`}
             onClick={handlePostSubmit}
             disabled={!newPost.trim() && !imageFile}
           >
-            Post
+            {submitting ? "Posting..." : "Post"}
           </Button>
         </div>
       </div>
@@ -178,7 +196,7 @@ export default function HomeFeed() {
       {/* Posts List */}
       <div className="flex flex-col gap-4 md:gap-6 w-full pb-6">
         {posts.length > 0 ? (
-          posts.map(post => (
+          posts.map((post) => (
             <PostCard
               key={post._id}
               post={post}
@@ -192,8 +210,12 @@ export default function HomeFeed() {
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <ImagePlus className="w-8 h-8 text-gray-400" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No posts yet</h3>
-            <p className="text-sm text-gray-600">Be the first to share something with the community!</p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              No posts yet
+            </h3>
+            <p className="text-sm text-gray-600">
+              Be the first to share something with the community!
+            </p>
           </div>
         )}
       </div>

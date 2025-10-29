@@ -1,11 +1,9 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import PrivateRoute from "./components/PrivateRoute";
-
 import DeveloperDashboard from "./pages/DeveloperDashboard/Index";
-import MentorDashboard from "./pages/MenorDashboard/MentorDashboard";
+import MentorDashboard from "./pages/MentorDashboard/MentorDashboard";
 import AdminDashboard from "./pages/AdminDashboard/Index";
-
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -26,7 +24,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgotpassword" element={<ForgotPassword />} />
 
-        {/* Pending Approval Page */}
+        {/* Pending Approval */}
         <Route path="/pending-approval" element={<PendingApproval />} />
 
         {/* Protected Dashboards */}
@@ -63,7 +61,7 @@ function App() {
           }
         />
 
-        {/* Catch-all redirect */}
+        {/* Catch-all */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

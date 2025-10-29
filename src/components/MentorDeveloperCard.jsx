@@ -12,9 +12,10 @@ import {
   X,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { followUser, unfollowUser, sendFriendRequest } from "../api/users";
+import { followUser, unfollowUser } from "../api/followApi";
+import { sendFriendRequest } from "../api/friendRequestApi";
 import Modal from "../pages/DeveloperDashboard/components/Modal";
-import UserProfileModal from "./UserProfileModal"; // adjust your path
+import UserProfileModal from "./UserProfileModal";  
 
 const MentorDeveloperCard = ({ user, onUpdate }) => {
   const navigate = useNavigate();
@@ -65,7 +66,7 @@ const MentorDeveloperCard = ({ user, onUpdate }) => {
   const handleViewProfile = (id) => {
     setProfileModalOpen(true);
     setModalUserId(id);
-    setModalUserData(user); // Pass user data
+    setModalUserData(user);  
   };
 
   return (
