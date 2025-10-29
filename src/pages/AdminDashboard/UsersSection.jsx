@@ -18,7 +18,11 @@ export default function UsersSection({ data, loading, refresh, query }) {
     if (!editForm.name.trim()) return setModalError("Name cannot be empty");
 
     try {
-      const res = await api.put(`/admin/users/${editUser._id}`, editForm);
+      const res = await api.put(
+        `/admin/users/${editUser._id}`,
+        editForm,
+        { withCredentials: true }
+      );
       if (res.status === 200) {
         toast.success("User updated");
         setEditUser(null);
@@ -32,7 +36,10 @@ export default function UsersSection({ data, loading, refresh, query }) {
   const handleDelete = async () => {
     setModalError("");
     try {
-      const res = await api.delete(`/admin/users/${deleteUser._id}`);
+      const res = await api.delete(
+        `/admin/users/${deleteUser._id}`,
+        { withCredentials: true }
+      );
       if (res.status === 200) {
         toast.success("User deleted");
         setDeleteUser(null);
