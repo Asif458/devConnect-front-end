@@ -9,6 +9,7 @@ import Header from "../../layouts/Header";
 import HomeFeed from "../DeveloperDashboard/HomeFeed";
 import MyProfilePage from "../Profile/MyProfilePag";
 import MentorConnections from "../MentorDashboard/MentorConnections";
+import MentorMyBookings from "./components/MentorMyBookings";
 
 import {
   Home,
@@ -64,7 +65,7 @@ export default function MentorDashboard() {
           {activeTab === "availability" && (
             <div>Set up your available sessions schedule here.</div>
           )}
-          {activeTab === "bookings" && <div>Your session bookings will show here.</div>}
+          {activeTab === "bookings" && <MentorMyBookings />}
           {activeTab === "messages" && <div>Your mentor messages here.</div>}
           {activeTab === "connections" && <MentorConnections />}
           {activeTab === "earnings" && <div>Your earnings analytics here.</div>}

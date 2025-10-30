@@ -252,10 +252,11 @@ const useAuthStore = create((set, get) => ({
       const res = await api.post("/auth/login", values, { withCredentials: true });
       const user = res?.data?.user;
       if (!user) throw new Error("Login failed: no user returned");
-
       user.status = getMentorStatus(user);
       set({ user, isAuthenticated: true, loading: false, initialized: true });
       toast.success("Login successful!");
+      // <-- Fetch/refresh actual backend profile state post-login (set cookie then fetch true profile)
+      await get().fetchUserProfile();
       return user;
     } catch (err) {
       const msg = err.response?.data?.message || "Login failed";

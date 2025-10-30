@@ -3,7 +3,8 @@ import api from "./axios";
 // Fetch user profile
 export const getUserProfile = async (userId) => {
   const { data } = await api.get(`/users/${userId}/profile`);
-  return data;
+  // Backend may return either a wrapped { user: {...} } or the raw object
+  return data?.user || data;
 };
 
 // Search users (by role, skill, etc.)

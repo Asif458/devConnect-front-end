@@ -42,18 +42,19 @@ export default function PrivateRoute({ children, role }) {
   const { user, isAuthenticated, loading, fetchUserProfile, initialized } = useAuthStore();
 
   useEffect(() => {
-    if (!initialized && !loading) {
+    if (!initialized) {
       fetchUserProfile();
     }
-  }, [initialized, loading, fetchUserProfile]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialized]);
 
-  // Loading gate first to avoid flicker
+  // If we've initialized and determined not authenticated, redirect immediately
+  if (!loading && initialized && !isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  // Loading gate
   if (loading || !initialized) {
     return <div className="p-8 text-center">Loading...</div>;
-  }
-  // Not authenticated after init → send to login
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
   }
 
   if (role && user && ![role].flat().includes(user.role)) {

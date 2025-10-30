@@ -15,33 +15,48 @@ import MyProfilePage from "../Profile/MyProfilePag";
 import SidebarLink from "./components/SideBar";
 import Header from "./components/Header";
 import DeveloperConnections from "./DeveloperConnections";
-import BookMentorship from "../DeveloperDashboard/components/MentorshipBooking/BookMentorship" 
+import BookMentorship from "../DeveloperDashboard/components/MentorshipBooking/BookMentorship";
+import MyBookings from "./components/MyBookings/MyBookings";
 import { PRIMARY_COLOR, sidebarItems } from "../../utils/constants";
+import useAuthStore from "../../ZustandStore/useAuthStore";
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
+
+// ✅ Static icon map (don’t recreate every render)
+const iconMap = {
+  feed: Home,
+  find: SearchIcon,
+  book: CalendarPlus,
+  bookings: CalendarCheck,
+  messages: MessageSquare,
+  connections: Users,
+  profile: User,
+};
 
 export default function DeveloperDashboard() {
   const [activeSlug, setActiveSlug] = useState("feed");
+  const location = useLocation();
+  const { fetchUserProfile } = useAuthStore();
 
+  useEffect(() => {
+    fetchUserProfile();
+  }, [location.pathname, fetchUserProfile]);
+
+  // ✅ Merge icon mapping once
   const sidebarItemMap = sidebarItems.map((item) => ({
     ...item,
-    icon: {
-      feed: Home,
-      find: SearchIcon,
-      book: CalendarPlus,         // Ensure 'book' exists in your sidebarItems and uses this slug
-      bookings: CalendarCheck,
-      messages: MessageSquare,
-      groups: Users,
-      profile: User,
-    }[item.slug] || Home,
+    icon: iconMap[item.slug] || Home,
   }));
 
   return (
-    <div className="flex h-screen w-screen bg-gray-100 font-sans">
+    <div className="flex h-screen w-screen bg-gray-100 font-sans overflow-hidden">
       {/* Sidebar */}
       <aside
         className="hidden md:flex flex-col fixed left-0 top-0 bottom-0 w-72 pt-8 z-40"
         style={{ backgroundColor: PRIMARY_COLOR }}
       >
-        <div className="flex items-center mb-10 p-4">
+        {/* Logo Section */}
+        <div className="flex items-center mb-10 px-6">
           <div className="w-12 h-12 rounded-full bg-white mr-4 flex items-center justify-center shadow-md">
             <span className="font-semibold text-lg" style={{ color: "#043873" }}>
               DC
@@ -52,6 +67,7 @@ export default function DeveloperDashboard() {
           </h1>
         </div>
 
+        {/* Sidebar Nav */}
         <nav className="space-y-2 px-4">
           {sidebarItemMap.map((item) => (
             <SidebarLink
@@ -73,14 +89,25 @@ export default function DeveloperDashboard() {
             {activeSlug === "feed" && <HomeFeed />}
             {activeSlug === "find" && <FindMentorsUsers />}
             {activeSlug === "profile" && <MyProfilePage />}
-            {activeSlug === "Connections" && <DeveloperConnections />}
-            {activeSlug === "book" && <BookMentorship />} {/* <-- Add this line */}
+            {activeSlug === "connections" && <DeveloperConnections />}
+            {activeSlug === "book" && <BookMentorship />}
+            {activeSlug === "bookings" && <MyBookings />}
 
-            {!["feed", "find", "profile", "Connections", "book"].includes(activeSlug) && (
+            {/* Fallback */}
+            {![
+              "feed",
+              "find",
+              "profile",
+              "connections",
+              "book",
+              "bookings",
+            ].includes(activeSlug) && (
               <div
                 className="p-10 text-center bg-white rounded-xl shadow-lg mt-4"
                 style={{ color: "#043873" }}
-              ></div>
+              >
+                Page Not Found
+              </div>
             )}
           </div>
         </main>
