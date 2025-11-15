@@ -15,7 +15,9 @@ import { useNavigate } from "react-router-dom";
 import { followUser, unfollowUser } from "../api/followApi";
 import { sendFriendRequest } from "../api/friendRequestApi";
 import Modal from "../pages/DeveloperDashboard/components/Modal";
-import UserProfileModal from "./UserProfileModal";  
+import UserProfileModal from "./UserProfileModal";
+import PremiumBadge from "./shared/PremiumBadge";
+import MentorBadge from "./shared/MentorBadge";  
 
 const MentorDeveloperCard = ({ user, onUpdate }) => {
   const navigate = useNavigate();
@@ -71,11 +73,11 @@ const MentorDeveloperCard = ({ user, onUpdate }) => {
 
   return (
     <>
-      {/* CARD */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 hover:shadow-xl hover:border-[#032f60]/30 transition-all duration-300 overflow-hidden group">
-        <div className="p-6">
-          {/* Profile Section */}
-          <div className="flex items-start gap-4 mb-4">
+      {/* Compact CARD */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md hover:border-blue-400 transition-all duration-200 overflow-hidden group h-full flex flex-col">
+        <div className="p-4">
+          {/* Profile Section - Compact */}
+          <div className="flex items-start gap-3 mb-3">
             <div className="relative flex-shrink-0">
               <img
                 src={
@@ -83,80 +85,82 @@ const MentorDeveloperCard = ({ user, onUpdate }) => {
                   `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=032f60&color=fff&size=128`
                 }
                 alt={user.name}
-                className="w-20 h-20 rounded-full object-cover ring-2 ring-gray-200 group-hover:ring-[#032f60]/50 transition-all"
+                className="w-14 h-14 rounded-full object-cover ring-1 ring-gray-200 group-hover:ring-blue-400 transition-all"
               />
               {user.role === "mentor" && (
-                <div className="absolute -bottom-1 -right-1 bg-[#032f60] rounded-full p-1.5 ring-2 ring-white">
-                  <Check className="w-3.5 h-3.5 text-white" />
+                <div className="absolute -bottom-0.5 -right-0.5 bg-[#032f60] rounded-full p-1 ring-1 ring-white">
+                  <Check className="w-2.5 h-2.5 text-white" />
                 </div>
               )}
             </div>
 
             <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-bold text-gray-900 truncate group-hover:text-[#032f60] transition-colors flex items-center gap-2">
-                {user.name}
+              <div className="flex items-start gap-1.5 flex-wrap mb-1">
+                <h3 className="text-base font-bold text-gray-900 truncate group-hover:text-blue-600 transition-colors">
+                  {user.name}
+                </h3>
                 {user.rating?.average > 0 && (
-                  <span className="flex items-center gap-1 text-xs font-semibold text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded-full">
-                    <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+                  <span className="flex items-center gap-0.5 text-[10px] font-semibold text-yellow-600 bg-yellow-50 px-1.5 py-0.5 rounded-full flex-shrink-0">
+                    <Star className="w-3 h-3 fill-yellow-400" />
                     {user.rating.average.toFixed(1)}
                   </span>
                 )}
-              </h3>
-              <p className="text-sm text-gray-600 font-medium">
+              </div>
+              <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                <PremiumBadge user={user} variant="small" />
+                <MentorBadge user={user} variant="small" />
+              </div>
+              <p className="text-xs text-gray-500 font-medium mb-1">
                 {user.role === "mentor" ? "Mentor" : "Developer"}
               </p>
-              <div className="flex items-center gap-2 mt-1.5 text-xs text-gray-500">
-                <span className="font-semibold">
-                  {followersCount} followers
-                </span>
-                <span className="text-gray-300">•</span>
-                <span className="font-semibold">
-                  {user.followingCount || 0} following
-                </span>
+              <div className="flex items-center gap-1.5 text-[10px] text-gray-400">
+                <span className="font-medium">{followersCount} followers</span>
+                <span>•</span>
+                <span className="font-medium">{user.followingCount || 0} following</span>
               </div>
             </div>
           </div>
 
-          {/* Bio */}
+          {/* Bio - Compact */}
           {user.bio && (
-            <p className="text-sm text-gray-700 mb-4 line-clamp-2 leading-relaxed">
+            <p className="text-xs text-gray-600 mb-3 line-clamp-2 leading-snug">
               {user.bio}
             </p>
           )}
 
-          {/* Skills */}
+          {/* Skills - Compact */}
           {allSkills.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-5">
-              {allSkills.slice(0, 4).map((skill, i) => (
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {allSkills.slice(0, 3).map((skill, i) => (
                 <span
                   key={i}
-                  className={`px-3 py-1 text-xs font-semibold rounded-full border transition-all hover:scale-105 ${skillColors[i % skillColors.length]}`}
+                  className={`px-2 py-0.5 text-[10px] font-medium rounded-full border ${skillColors[i % skillColors.length]}`}
                 >
                   {getSkillName(skill)}
                 </span>
               ))}
-              {allSkills.length > 4 && (
-                <span className="px-3 py-1 text-xs font-semibold bg-gray-100 text-gray-600 rounded-full border border-gray-200">
-                  +{allSkills.length - 4}
+              {allSkills.length > 3 && (
+                <span className="px-2 py-0.5 text-[10px] font-medium bg-gray-100 text-gray-600 rounded-full border border-gray-200">
+                  +{allSkills.length - 3}
                 </span>
               )}
             </div>
           )}
 
-          {/* Action Buttons */}
-          <div className="space-y-2.5">
+          {/* Action Buttons - Compact & Aligned */}
+          <div className="space-y-2 mt-auto">
             {/* Row 1: View Profile & Follow */}
-            <div className="grid grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => handleViewProfile(user._id)}
-                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#032f60] text-white rounded-xl font-semibold text-sm hover:bg-[#021d38] active:scale-95 transition-all shadow-sm hover:shadow-md"
+                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-[#032f60] text-white rounded-lg font-semibold text-xs hover:bg-[#021d38] active:scale-95 transition-all shadow-sm"
               >
-                <Eye className="w-4 h-4" />
-                View Profile
+                <Eye className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">View</span>
               </button>
               <button
                 onClick={handleFollowToggle}
-                className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all active:scale-95 shadow-sm ${
+                className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg font-semibold text-xs transition-all active:scale-95 shadow-sm ${
                   isFollowing
                     ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     : "bg-blue-50 text-[#032f60] border border-[#032f60]/20 hover:bg-blue-100"
@@ -164,13 +168,13 @@ const MentorDeveloperCard = ({ user, onUpdate }) => {
               >
                 {isFollowing ? (
                   <>
-                    <UserCheck className="w-4 h-4" />
-                    Following
+                    <UserCheck className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Followed</span>
                   </>
                 ) : (
                   <>
-                    <Users className="w-4 h-4" />
-                    Follow
+                    <Users className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Follow</span>
                   </>
                 )}
               </button>
@@ -180,48 +184,48 @@ const MentorDeveloperCard = ({ user, onUpdate }) => {
             <button
               onClick={() => connectionStatus === "none" && setShowRequestModal(true)}
               disabled={connectionStatus !== "none"}
-              className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-sm ${
+              className={`w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg font-semibold text-xs transition-all shadow-sm ${
                 connectionStatus === "pending"
                   ? "bg-gray-100 text-gray-500 cursor-not-allowed"
                   : connectionStatus === "accepted"
-                  ? "bg-green-50 text-green-700 border-2 border-green-200 hover:bg-green-100"
-                  : "bg-white text-[#032f60] border-2 border-[#032f60] hover:bg-[#032f60] hover:text-white active:scale-95"
+                  ? "bg-green-50 text-green-700 border border-green-200 hover:bg-green-100"
+                  : "bg-white text-[#032f60] border border-[#032f60] hover:bg-[#032f60] hover:text-white active:scale-95"
               }`}
             >
               {connectionStatus === "pending" ? (
                 <>
-                  <Clock className="w-4 h-4" />
-                  Request Sent
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>Request Sent</span>
                 </>
               ) : connectionStatus === "accepted" ? (
                 <>
-                  <Check className="w-4 h-4" />
-                  Connected
+                  <Check className="w-3.5 h-3.5" />
+                  <span>Connected</span>
                 </>
               ) : (
                 <>
-                  <UserPlus className="w-4 h-4" />
-                  Send Friend Request
+                  <UserPlus className="w-3.5 h-3.5" />
+                  <span className="truncate">Connect</span>
                 </>
               )}
             </button>
 
             {/* Row 3: Chat & Video (only if connected) */}
             {canChatVideo && (
-              <div className="grid grid-cols-2 gap-2.5 pt-1">
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => navigate(`/messages/${user._id}`)}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 active:scale-95 transition-all shadow-sm"
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-600 text-white rounded-lg font-semibold text-xs hover:bg-blue-700 active:scale-95 transition-all shadow-sm"
                 >
-                  <MessageCircle className="w-4 h-4" />
-                  Chat
+                  <MessageCircle className="w-3.5 h-3.5" />
+                  <span>Chat</span>
                 </button>
                 <button
                   onClick={() => navigate(`/video-call/${user._id}`)}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-xl font-semibold text-sm hover:bg-green-700 active:scale-95 transition-all shadow-sm"
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 bg-green-600 text-white rounded-lg font-semibold text-xs hover:bg-green-700 active:scale-95 transition-all shadow-sm"
                 >
-                  <Video className="w-4 h-4" />
-                  Video
+                  <Video className="w-3.5 h-3.5" />
+                  <span>Video</span>
                 </button>
               </div>
             )}

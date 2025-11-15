@@ -1,119 +1,240 @@
 import React from "react";
-import { Calendar, Clock } from "lucide-react";
+import { Calendar, Clock, Video, MessageSquare, CheckCircle, XCircle, Award, Sparkles } from "lucide-react";
 
-export default function BookingCard({ session, showMenteeInfo = false }) {
-  if (!session || !(session.mentorId || session.mentor)) return null;
+export default function BookingCard({ session, showMenteeInfo = false, showActions = false, onComplete, onCancel, onChat }) {
+    if (!session || !(session.mentorId || session.mentor)) return null;
 
-  const mentor = session.mentorId || session.mentor || {};
-  if (!mentor.name) return null; // Hides Unknown Mentor
-  const status = (session.status || '').toLowerCase();
-  const statusStyle = status === 'completed'
-    ? 'bg-green-100 text-green-700 border-green-200'
-    : status === 'cancelled'
-    ? 'bg-red-100 text-red-700 border-red-200'
-    : 'bg-blue-100 text-blue-700 border-blue-200';
-  const mentee = session.menteeId || session.mentee || {};
+    const mentor = session.mentorId || session.mentor || {};
+    if (!mentor.name) return null;
+    const mentee = session.menteeId || session.mentee || {};
+    
+    const status = (session.status || '').toLowerCase();
+    
+    // --- Modern Status Styling (Kept consistent) ---
+    let statusStyle = 'bg-gray-100 text-gray-600'; 
+    let statusIcon = null;
+    let statusDot = 'bg-gray-400';
 
-  const menteeName = mentee.name || "Unknown Mentee";
-  const menteePhoto = mentee.profilePhoto;
-  const menteeInitials = menteeName[0]?.toUpperCase() || "M";
-  const mentorName = mentor.name || "Unknown Mentor";
-  const mentorPhoto = mentor.profilePhoto;
-  const mentorInitials = mentorName[0]?.toUpperCase() || "M";
-  const mentorExperience =
-    mentor.mentorProfile?.experience || mentor.title || "Experience not provided";
-  // Skill extraction logic
-  let mentorSkills = [];
-  if (Array.isArray(mentor.skills) && mentor.skills.length > 0) {
-    mentorSkills = mentor.skills.map(skill => typeof skill === "string" ? skill : skill?.name);
-  } else if (Array.isArray(mentor.mentorProfile?.expertise)) {
-    mentorSkills = mentor.mentorProfile.expertise.map(skill => typeof skill === "string" ? skill : skill?.name);
-  }
-  const sessionTopic = mentorSkills[0]
-    ? `${mentorSkills[0]} Session`
-    : "General Mentorship Session";
+    if (status === 'completed') {
+        statusStyle = 'bg-emerald-50 text-emerald-700';
+        statusIcon = <CheckCircle className="w-3.5 h-3.5 mr-1" />;
+        statusDot = 'bg-emerald-500'; 
+    } else if (status === 'cancelled') {
+        statusStyle = 'bg-red-50 text-red-700';
+        statusIcon = <XCircle className="w-3.5 h-3.5 mr-1" />;
+        statusDot = 'bg-red-500'; 
+    } else { // Scheduled/Pending
+        statusStyle = 'bg-blue-50 text-blue-700';
+        statusIcon = <Clock className="w-3.5 h-3.5 mr-1" />;
+        statusDot = 'bg-blue-500'; 
+    }
 
-  // Date and time formatting
-  let dateString = "";
-  const bookingDate = session.date || session.sessionDate;
-  if (bookingDate) {
-    try {
-      const dateObj = new Date(bookingDate);
-      if (!isNaN(dateObj.getTime())) {
-        dateString = dateObj.toLocaleDateString("en-IN", {
-          weekday: "short",
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-          timeZone: "Asia/Kolkata",
-        });
-      }
-    } catch { /* empty */ }
-  }
-  const slotString = session.slot || session.time || (session.startTime && session.endTime ? `${session.startTime} - ${session.endTime}` : "Time not specified");
-  const fullSessionTime =
-    (dateString ? dateString : "Date not specified") +
-    (slotString ? `, ${slotString}` : "");
+    const menteeName = mentee.name || "Unknown Mentee";
+    const menteePhoto = mentee.profilePhoto;
+    const menteeInitials = menteeName[0]?.toUpperCase() || "M";
+    const mentorName = mentor.name || "Unknown Mentor";
+    const mentorPhoto = mentor.profilePhoto;
+    const mentorInitials = mentorName[0]?.toUpperCase() || "M";
+    const mentorExperience = mentor.mentorProfile?.experience || mentor.title || "Experience not provided";
+        
+    // Skill extraction logic (kept same)
+    let mentorSkills = [];
+    if (Array.isArray(mentor.skills) && mentor.skills.length > 0) {
+        mentorSkills = mentor.skills.map(skill => typeof skill === "string" ? skill : skill?.name);
+    } else if (Array.isArray(mentor.mentorProfile?.expertise)) {
+        mentorSkills = mentor.mentorProfile.expertise.map(skill => typeof skill === "string" ? skill : skill?.name);
+    }
+    const sessionTopic = mentorSkills[0] ? `${mentorSkills[0]} Session` : "General Mentorship Session";
 
-  return (
-     
-    <div className="bg-white rounded-xl shadow-sm border p-5 mb-6 flex items-center justify-between">
-      {/* LEFT SECTION */}
-      <div className="flex flex-col flex-shrink-0">
-        {/* Mentor Info */}
-        <div className="flex items-center gap-3 mb-3">
-          {mentorPhoto ? (
-            <img src={mentorPhoto} alt={mentorName} className="w-14 h-14 rounded-full object-cover" />
-          ) : (
-            <div className="w-14 h-14 rounded-full bg-gray-300 flex items-center justify-center text-xl text-white font-semibold">{mentorInitials}</div>
-          )}
-          <div>
-            <div className="flex items-center gap-3">
-              <div className="text-lg font-semibold text-gray-800">{mentorName}</div>
-              {status && (
-                <span className={`px-2 py-0.5 text-xs font-semibold rounded border ${statusStyle}`}>
-                  {status.charAt(0).toUpperCase() + status.slice(1)}
-                </span>
-              )}
+    // Date and time formatting (kept same)
+    let dateString = "";
+    const bookingDate = session.date || session.sessionDate;
+    if (bookingDate) {
+        try {
+            const dateObj = new Date(bookingDate);
+            if (!isNaN(dateObj.getTime())) {
+                dateString = dateObj.toLocaleDateString("en-IN", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                    timeZone: "Asia/Kolkata",
+                });
+            }
+        } catch { /* empty */ }
+    }
+    const slotString = session.slot || session.time || (session.startTime && session.endTime ? `${session.startTime} - ${session.endTime}` : "Time not specified");
+    
+    // Helper function for Avatar (Increased size: w-14 h-14)
+    const renderAvatar = (photo, initials, name, sizeClass) => (
+        photo ? (
+            <img 
+                src={photo} 
+                alt={name} 
+                className={`${sizeClass} rounded-full object-cover shadow-md transition-all duration-200 hover:scale-105`} 
+            />
+        ) : (
+            <div className={`${sizeClass} rounded-full bg-blue-500 flex items-center justify-center text-white text-base font-semibold shadow-md transition-all duration-200 hover:scale-105`}>
+                {initials[0]}
             </div>
-            <div className="text-xs text-gray-500 mt-1">{mentorExperience}</div>
-          </div>
-        </div>
-        <div className="bg-blue-50 text-blue-700 text-sm font-semibold px-3 py-1 rounded w-fit mb-3">{sessionTopic}</div>
-        {showMenteeInfo && (
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-bold text-gray-600">Mentee -</span>
-            {menteePhoto ? (
-              <img src={menteePhoto} alt={menteeName} className="w-10 h-10 rounded-full object-cover" />
-            ) : (
-              <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-base text-white font-semibold">{menteeInitials}</div>
+        )
+    );
+    
+    const isScheduled = status === 'scheduled' || status === 'pending';
+
+    return (
+        <div className="
+            /* Increased Padding: p-6 */
+            bg-white 
+            rounded-xl 
+            shadow-xl 
+            border border-gray-200 
+            p-6 
+            mb-6 
+            overflow-hidden 
+            transition-all duration-300 
+            hover:shadow-2xl hover:border-blue-300 hover:translate-y-[-2px]
+        ">
+            
+            {/* Main Content Area - Horizontal Layout */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
+                
+                {/* 1. LEFT SECTION (Mentor Info & Topic) */}
+                <div className="flex items-center gap-4 min-w-0 md:w-3/5">
+                    
+                    {/* Mentor Avatar (Larger: w-14 h-14) */}
+                    {renderAvatar(mentorPhoto, mentorInitials, mentorName, "w-14 h-14 flex-shrink-0")}
+                    
+                    <div className="flex flex-col min-w-0 flex-1">
+                        
+                        {/* Mentor Name (Larger font: text-lg) */}
+                        <h3 className="text-lg font-bold text-gray-900 leading-snug truncate">
+                            {mentorName}
+                        </h3>
+                        {/* Experience/Title (Slightly larger font: text-sm) */}
+                        <p className="text-sm text-gray-500 mt-1 flex items-center gap-2 truncate">
+                            <Award className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                            <span className="truncate">{mentorExperience}</span>
+                        </p>
+
+                        {/* Session Topic / Main Skill - Badge (Slightly larger padding) */}
+                        <div className="text-sm text-blue-600 bg-blue-50 font-medium px-3 py-1 rounded-full w-fit mt-2 flex items-center gap-2">
+                            <Sparkles className="w-4 h-4 flex-shrink-0" />
+                            <span className="truncate">{sessionTopic}</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 2. MIDDLE SECTION (Date & Time) - IMPROVED DESIGN */}
+                <div className="
+                    flex items-center justify-center
+                    md:w-1/4 min-w-[200px] 
+                    md:border-l border-gray-200 
+                    pt-3 md:pt-0 pl-0 md:pl-6
+                ">
+                    <div className="
+                        /* Dedicated container for better alignment */
+                        bg-gray-50 
+                        rounded-lg 
+                        p-3 
+                        w-full 
+                        shadow-inner 
+                        border border-gray-100
+                        space-y-2
+                    ">
+                        {/* Date Block */}
+                        <div className="flex items-center gap-3 text-gray-700">
+                            <Calendar className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                            <div className="flex flex-col min-w-0">
+                                <span className="text-xs text-gray-500 font-medium leading-tight">Date</span>
+                                <span className="text-sm font-bold text-gray-900 truncate">{dateString || "Date N/A"}</span>
+                            </div>
+                        </div>
+                        
+                        {/* Time Block */}
+                        <div className="flex items-center gap-3 text-gray-700">
+                            <Clock className="w-5 h-5 text-purple-600 flex-shrink-0" />
+                            <div className="flex flex-col min-w-0">
+                                <span className="text-xs text-gray-500 font-medium leading-tight">Time</span>
+                                <span className="text-sm font-bold text-gray-900 truncate">{slotString.split(' ')[0] || "Time N/A"}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 3. RIGHT SECTION (Status & Actions) */}
+                <div className="flex gap-3 md:w-1/5 flex-shrink-0 items-center justify-end">
+                    
+                    {/* Status Tag (Primary position for non-mobile) */}
+                    <span className={`px-3 py-1.5 text-sm font-bold rounded-full inline-flex items-center ${statusStyle} flex-shrink-0 transition-all duration-300 hidden md:inline-flex`}>
+                        <span className={`w-2 h-2 rounded-full ${statusDot} mr-2 animate-pulse`}></span>
+                        {statusIcon} 
+                        {status.charAt(0).toUpperCase() + status.slice(1)}
+                    </span>
+
+                    {/* Join Call Button (Icon only - Larger: p-2.5) */}
+                    <button 
+                        className={`p-2.5 rounded-lg transition-all duration-200 flex items-center justify-center ${
+                            isScheduled 
+                                ? 'bg-blue-500 text-white hover:bg-blue-600 shadow-md hover:shadow-lg hover:scale-110 active:scale-95' 
+                                : 'bg-gray-200 text-gray-500 cursor-not-allowed opacity-70'
+                        }`}
+                        disabled={!isScheduled}
+                        title="Join Call"
+                    >
+                        <Video className="w-5 h-5" />
+                    </button>
+                    
+                    {/* Chat Button (Icon only - Larger: p-2.5) */}
+                    <button 
+                        onClick={() => {
+                            if (onChat) {
+                                // If showing mentee info (mentor view), chat with mentee
+                                // Otherwise (developer view), chat with mentor
+                                const chatUser = showMenteeInfo ? mentee : mentor;
+                                onChat(chatUser);
+                            }
+                        }}
+                        className={`p-2.5 rounded-lg transition-all duration-200 border-2 ${
+                            isScheduled 
+                                ? 'bg-white text-gray-600 border-gray-300 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 hover:scale-110 active:scale-95' 
+                                : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-70'
+                        }`}
+                        disabled={!isScheduled}
+                        title="Chat"
+                    >
+                        <MessageSquare className="w-5 h-5" />
+                    </button>
+
+                    {/* Admin Actions (Larger Icons) */}
+                    {showActions && isScheduled && (
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => onComplete && onComplete(session._id)}
+                                className="bg-emerald-500 text-white p-2 rounded-lg hover:bg-emerald-600 transition-all duration-200 hover:scale-110"
+                                title="Complete"
+                            >
+                                <CheckCircle className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => onCancel && onCancel(session._id)}
+                                className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 transition-all duration-200 hover:scale-110"
+                                title="Cancel"
+                            >
+                                <XCircle className="w-4 h-4" />
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* MENTEE INFO (If showMenteeInfo is true) - Subtler Row (Larger font: text-sm) */}
+            {showMenteeInfo && (
+                <div className="flex items-center gap-3 mt-4 pt-4 border-t border-gray-100 w-full text-sm">
+                    <span className="font-semibold text-gray-700 shrink-0">Mentee:</span>
+                    {renderAvatar(menteePhoto, menteeInitials, menteeName, "w-7 h-7")}
+                    <span className="text-gray-800 font-medium truncate">{menteeName}</span>
+                </div>
             )}
-            <span className="text-xs text-gray-700 font-medium">{menteeName}</span>
-          </div>
-        )}
-      </div>
-      {/* MIDDLE SECTION — DATE & TIME */}
-      <div className="flex flex-col flex-grow px-8 text-gray-700">
-        <div className="flex items-center gap-2 text-sm font-medium">
-          <Calendar className="w-4 h-4 text-gray-500" />
-          <span>{fullSessionTime}</span>
         </div>
-      </div>
-      {/* RIGHT SECTION — ACTION BUTTONS */}
-      <div className="flex flex-col items-end gap-2">
-        <button className="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700 transition font-semibold flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14m-4 0H5a2 2 0 01-2-2V8a2 2 0 012-2h6a2 2 0 012 2v4z" />
-          </svg>
-          Join Call
-        </button>
-        <button className="bg-gray-100 text-gray-700 px-4 py-2 rounded border hover:bg-gray-200 transition font-semibold flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v8a2 2 0 01-2 2H7l-4 4V10a2 2 0 012-2h2" />
-          </svg>
-          Chat
-        </button>
-      </div>
-    </div>
-  );
+    );
 }

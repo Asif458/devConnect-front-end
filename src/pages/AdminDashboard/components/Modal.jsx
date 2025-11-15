@@ -9,13 +9,27 @@ function Modal({ isOpen, onClose, title, children, onConfirm, confirmText = "Sav
         {children}
         <div className="flex gap-3 justify-end mt-6">
           <button
-            onClick={onClose}
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (onClose && typeof onClose === 'function') {
+                onClose();
+              }
+            }}
             className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
           >
             Cancel
           </button>
           <button
-            onClick={onConfirm}
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (onConfirm && typeof onConfirm === 'function') {
+                onConfirm();
+              }
+            }}
             className={`px-4 py-2 rounded-lg text-white font-medium transition-colors ${
               isDanger ? "bg-red-600 hover:bg-red-700" : "bg-blue-600 hover:bg-blue-700"
             }`}

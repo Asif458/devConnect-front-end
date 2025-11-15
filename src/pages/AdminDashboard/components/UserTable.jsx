@@ -76,14 +76,34 @@ function TableCard({
                 <td className="px-6 py-4">
                   <div className="flex gap-3">
                     <button
-                      onClick={() => onEdit(u)}
-                      className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (onEdit && typeof onEdit === 'function') {
+                          onEdit(u);
+                        } else {
+                          console.error("onEdit handler is not defined or not a function");
+                        }
+                      }}
+                      className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors cursor-pointer"
+                      aria-label="Edit user"
                     >
                       <Edit2 size={18} />
                     </button>
                     <button
-                      onClick={() => onDelete(u)}
-                      className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (onDelete && typeof onDelete === 'function') {
+                          onDelete(u);
+                        } else {
+                          console.error("onDelete handler is not defined or not a function");
+                        }
+                      }}
+                      className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors cursor-pointer"
+                      aria-label="Delete user"
                     >
                       <Trash2 size={18} />
                     </button>

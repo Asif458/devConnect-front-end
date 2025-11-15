@@ -38,7 +38,7 @@ export default function Login() {
   const handleSubmit = async (values, { setSubmitting, setErrors }) => {
     try {
       const user = await login(values);
-      toast.success("Login successful!");
+      toast.success("Login successful!", { duration: 3000 });
       redirectByRole(user.role);
     } catch (error) {
       console.error(error);

@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
-import { toast } from "react-hot-toast";
+import toast from "react-hot-toast";
 import useAuthStore  from "../../ZustandStore/useAuthStore";
 import { getUserProfile, updateUserProfile } from "../../api/users";
 import PostCard from "../DeveloperDashboard/components/postcard/PostCard";

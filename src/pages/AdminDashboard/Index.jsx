@@ -18,8 +18,10 @@ import {
 } from "lucide-react";
 import Modal from "./components/Modal";
 import StatCard from "./components/StatCard";
-import ChartCard from "./components/ChartCard";
 import Button from "../../components/Button";
+import ContentModeration from "./ContentModeration";
+import Payments from "./Payments";
+import DashboardOverview from "./DashboardOverview";
 import api from "../../api/axios";
 import useAuthStore from "../../ZustandStore/useAuthStore";
 import toast, { Toaster } from "react-hot-toast";
@@ -49,7 +51,7 @@ function TableCard({
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full pl-3 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         <select
@@ -58,7 +60,7 @@ function TableCard({
             setFilterRole(e.target.value);
             setCurrentPage(1);
           }}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+          className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         >
           <option value="all">All Roles</option>
           <option value="developer">Developer</option>
@@ -67,208 +69,232 @@ function TableCard({
         </select>
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-xl shadow-lg overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th className="px-6 py-4 text-left font-semibold text-gray-700">Name</th>
-              <th className="px-6 py-4 text-left font-semibold text-gray-700">Email</th>
-              <th className="px-6 py-4 text-left font-semibold text-gray-700">Role</th>
-              <th className="px-6 py-4 text-left font-semibold text-gray-700">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {users.map((u) => (
-              <tr key={u._id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-6 py-4 font-medium text-gray-900">{u.name}</td>
-                <td className="px-6 py-4 text-gray-600">{u.email}</td>
-                <td className="px-6 py-4">
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-bold capitalize ${
-                      u.role === "admin"
-                        ? "bg-purple-100 text-purple-700"
-                        : u.role === "mentor"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-blue-100 text-blue-700"
-                    }`}
-                  >
-                    {u.role}
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => onEdit(u)}
-                      className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
-                    >
-                      <Edit2 size={18} />
-                    </button>
-                    <button
-                      onClick={() => onDelete(u)}
-                      className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-                </td>
+      {/* Users Table */}
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {users.map((user) => (
+                <tr key={user._id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 h-10 w-10">
+                        <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                          <span className="text-blue-800 font-medium">
+                            {user.name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="ml-4">
+                        <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                        <div className="text-sm text-gray-500">{user.email}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                      {user.role}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                      Active
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button
+                      onClick={() => onEdit(user)}
+                      className="text-blue-600 hover:text-blue-900 mr-3"
+                    >
+                      <Edit2 size={16} />
+                    </button>
+                    <button
+                      onClick={() => onDelete(user)}
+                      className="text-red-600 hover:text-red-900"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between bg-white p-4 rounded-xl shadow-lg">
-          <p className="text-sm text-gray-600">
-            Page {currentPage} of {totalPages}
-          </p>
-          <div className="flex gap-2">
+        {/* Pagination */}
+        <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+          <div className="flex-1 flex justify-between sm:hidden">
             <button
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
             >
               Previous
             </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`w-10 h-10 rounded-lg font-medium transition-colors ${
-                  currentPage === page
-                    ? "bg-blue-600 text-white"
-                    : "border border-gray-300 text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                {page}
-              </button>
-            ))}
             <button
               onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
               disabled={currentPage === totalPages}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
             >
               Next
             </button>
           </div>
+          <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm text-gray-700">
+                Showing page <span className="font-medium">{currentPage}</span> of{" "}
+                <span className="font-medium">{totalPages || 1}</span>
+              </p>
+            </div>
+            <div>
+              <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                <button
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                >
+                  <span className="sr-only">Previous</span>
+                  <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+                </button>
+                <button
+                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                >
+                  <span className="sr-only">Next</span>
+                  <ChevronRight className="h-5 w-5" aria-hidden="true" />
+                </button>
+              </nav>
+            </div>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
 
 export default function AdminDashboard() {
-  const user = useAuthStore((s) => s.user);
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const logout = useAuthStore((s) => s.logout);
-  const loading = useAuthStore((s) => s.loading);
-  const fetchUserProfile = useAuthStore((s) => s.fetchUserProfile);
-
-  const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const [profileDropdown, setProfileDropdown] = useState(false);
-
-  const [users, setUsers] = useState([]);
+  const { user, logout: authLogout, loading } = useAuthStore();
   const [dashboardData, setDashboardData] = useState(null);
+  const [users, setUsers] = useState([]);
   const [pendingMentors, setPendingMentors] = useState([]);
-
+  const [editUser, setEditUser] = useState(null);
+  const [deleteUser, setDeleteUser] = useState(null);
+  const [editForm, setEditForm] = useState({ name: "", email: "", role: "" });
+  const [modalError, setModalError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRole, setFilterRole] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const [pagination, setPagination] = useState({ limit: 15, totalPages: 1, total: 0 });
+  const [pagination, setPagination] = useState({ totalPages: 1, total: 0, limit: 10 });
 
-  const [editUser, setEditUser] = useState(null);
-  const [deleteUser, setDeleteUser] = useState(null);
-  const [editForm, setEditForm] = useState({ name: "", role: "" });
-  const [modalError, setModalError] = useState("");
-
-  const iconMap = {
-    Users: Users,
-    UserCheck: UserCheck,
+  const logout = async () => {
+    try {
+      await authLogout();
+      toast.success("Logged out successfully");
+    } catch {
+      toast.error("Logout failed");
+    }
   };
 
-  useEffect(() => {
-    fetchUserProfile();
-  }, [fetchUserProfile]);
-
-  useEffect(() => {
-    if (!loading && (!isAuthenticated || user?.role !== "admin")) {
-      window.location.href = "/admin-login";
-    }
-  }, [isAuthenticated, loading, user]);
-
+  // Fetch dashboard stats
   useEffect(() => {
     if (activeTab === "dashboard") {
-      api
-        .get("/admin/dashboard-stats", { withCredentials: true })
-        .then((res) => setDashboardData(res.data))
+      api.get("/admin/dashboard-stats")
+        .then(res => setDashboardData(res.data))
         .catch(() => toast.error("Failed to load dashboard data"));
     }
   }, [activeTab]);
 
+  // Fetch users
   useEffect(() => {
-    if (activeTab !== "users") return;
+    if (activeTab === "users") {
+      const fetchUsers = async () => {
+        try {
+          const params = { page: currentPage, limit: pagination.limit };
+          if (filterRole !== "all") params.role = filterRole;
+          if (searchTerm) params.search = searchTerm;
+          const res = await api.get("/admin/users", { params, withCredentials: true });
+          setUsers(res.data.users || []);
+          setPagination({
+            ...pagination,
+            totalPages: res.data.totalPages || 1,
+            total: res.data.total || 0,
+          });
+        } catch {
+          toast.error("Failed to load users");
+        }
+      };
+      fetchUsers();
+    }
+  }, [activeTab, currentPage, pagination.limit, filterRole, searchTerm]);
 
-    const fetchUsers = async () => {
-      try {
-        const params = {
-          page: currentPage,
-          limit: pagination.limit,
-          search: searchTerm,
-        };
-        if (filterRole !== "all") params.role = filterRole;
-
-        const res = await api.get("/admin/users", { params, withCredentials: true });
-        setUsers(res.data.users || []);
-        setPagination((prev) => ({
-          ...prev,
-          totalPages: res.data.totalPages || 1,
-          total: res.data.total || 0,
-        }));
-      } catch {
-        toast.error("Failed to load users");
-      }
-    };
-    fetchUsers();
-  }, [activeTab, currentPage, searchTerm, filterRole, pagination.limit]);
-
+  // Fetch pending mentors
   useEffect(() => {
-    if (activeTab !== "approveMentors") return;
-    api
-      .get("/admin/pending-mentors", { withCredentials: true })
-      .then((res) => setPendingMentors(res.data || []))
-      .catch(() => toast.error("Failed to fetch pending mentors"));
+    if (activeTab === "approveMentors") {
+      const fetchMentors = async () => {
+        try {
+          const res = await api.get("/admin/pending-mentors");
+          setPendingMentors(res.data || []);
+        } catch {
+          toast.error("Failed to fetch pending mentors");
+        }
+      };
+      fetchMentors();
+    }
   }, [activeTab]);
 
   const handleEditSave = async () => {
-    if (!editForm.name.trim()) {
-      setModalError("Name cannot be empty");
-      return;
-    }
+    if (!editUser) return;
     try {
-      const res = await api.put(`/admin/users/${editUser._id}`, editForm, { withCredentials: true });
-      if (res.status === 200) {
-        setUsers((prev) => prev.map((u) => (u._id === editUser._id ? { ...u, ...editForm } : u)));
-        setEditUser(null);
-        toast.success("User updated ✅");
-      }
-    } catch (err) {
-      setModalError(err.response?.data?.message || "Failed to update user");
+      await api.put(`/admin/users/${editUser._id}`, editForm, { withCredentials: true });
+      const refreshRes = await api.get("/admin/users", {
+        params: { page: currentPage, limit: pagination.limit },
+        withCredentials: true,
+      });
+      setUsers(refreshRes.data.users || []);
+      setPagination((prev) => ({
+        ...prev,
+        totalPages: refreshRes.data.totalPages || 1,
+        total: refreshRes.data.total || 0,
+      }));
+      setEditUser(null);
+      toast.success("User updated successfully");
+    } catch (error) {
+      setModalError(error.response?.data?.message || "Failed to update user");
+      toast.error("Failed to update user");
     }
   };
 
-  const handleDelete = async () => {
+  const handleDeleteUser = async () => {
+    if (!deleteUser) return;
     try {
-      const res = await api.delete(`/admin/users/${deleteUser._id}`, { withCredentials: true });
-      if (res.status === 200) {
-        setUsers((prev) => prev.filter((u) => u._id !== deleteUser._id));
-        setDeleteUser(null);
-        toast.success("User deleted 🗑️");
-      }
-    } catch (err) {
-      setModalError(err.response?.data?.message || "Failed to delete user");
+      await api.delete(`/admin/users/${deleteUser._id}`, { withCredentials: true });
+      const refreshRes = await api.get("/admin/users", {
+        params: { page: currentPage, limit: pagination.limit },
+        withCredentials: true,
+      });
+      setUsers(refreshRes.data.users || []);
+      setPagination((prev) => ({
+        ...prev,
+        totalPages: refreshRes.data.totalPages || 1,
+        total: refreshRes.data.total || 0,
+      }));
+      setDeleteUser(null);
+      toast.success("User deleted 🗑️");
+    } catch (error) {
+      setModalError(error.response?.data?.message || "Failed to delete user");
+      toast.error("Failed to delete user");
     }
   };
 
@@ -296,9 +322,8 @@ export default function AdminDashboard() {
     { name: "Dashboard", icon: LayoutDashboard, tab: "dashboard" },
     { name: "Users & Mentors", icon: Users, tab: "users" },
     { name: "Approve Mentors", icon: CheckCircle, tab: "approveMentors" },
-    { name: "Content", icon: ShieldCheck, tab: "content" },
+    { name: "Content Moderation", icon: ShieldCheck, tab: "content" },
     { name: "Notifications", icon: Bell, tab: "notifications" },
-    { name: "Reports", icon: BarChart2, tab: "reports" },
     { name: "Payments", icon: DollarSign, tab: "payments" },
   ];
 
@@ -309,18 +334,36 @@ export default function AdminDashboard() {
       </div>
     );
 
-  const mappedStats = dashboardData?.stats?.map((stat) => ({
-    ...stat,
-    Icon: iconMap[stat.icon] || null,
-  }));
-
   return (
     <div className="flex h-screen w-screen bg-gray-100 overflow-hidden">
-      <Toaster position="top-right" />
+      <Toaster 
+        position="top-right" 
+        toastOptions={{
+          style: {
+            background: '#032f60',
+            color: '#fff',
+          },
+          success: {
+            style: {
+              background: '#032f60',
+            },
+          },
+          error: {
+            style: {
+              background: '#dc2626',
+            },
+          },
+        }}
+        containerStyle={{
+          top: '80px',
+          right: '20px',
+          zIndex: 9999,
+        }}
+      />
       <aside
         className={`${
           sidebarExpanded ? "w-64" : "w-20"
-        } bg-gradient-to-b from-slate-900 to-slate-800 text-white flex flex-col transition-all duration-300 shadow-xl`}
+        } bg-linear-to-b from-slate-900 to-slate-800 text-white flex flex-col transition-all duration-300 shadow-xl`}
       >
         <div className="p-4 border-b border-slate-700 flex items-center justify-between">
           {sidebarExpanded && <h1 className="text-xl font-bold">DevConnect</h1>}
@@ -363,6 +406,8 @@ export default function AdminDashboard() {
               ? "Manage Users & Mentors"
               : activeTab === "approveMentors"
               ? "Approve Mentors"
+              : activeTab === "content"
+              ? "Content Moderation"
               : activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
           </h2>
           <div className="flex items-center gap-4 relative">
@@ -392,20 +437,14 @@ export default function AdminDashboard() {
           </div>
         </header>
         <main className="flex-1 p-6 overflow-y-auto">
-          {activeTab === "dashboard" && mappedStats && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {mappedStats.map(({ title, value, Icon }) => (
-                <StatCard key={title} title={title} value={value} Icon={Icon} />
-              ))}
-            </div>
-          )}
+          {activeTab === "dashboard" && <DashboardOverview dashboardData={dashboardData} />}
 
           {activeTab === "users" && (
             <TableCard
               users={users}
               onEdit={(user) => {
                 setEditUser(user);
-                setEditForm({ name: user.name, role: user.role });
+                setEditForm({ name: user.name, email: user.email || "", role: user.role });
                 setModalError("");
               }}
               onDelete={(user) => {
@@ -452,52 +491,72 @@ export default function AdminDashboard() {
               </div>
             </div>
           )}
+
+          {activeTab === "content" && <ContentModeration />}
+
+          {activeTab === "payments" && <Payments />}
         </main>
       </div>
-      {editUser && (
-        <Modal title="Edit User" onClose={() => setEditUser(null)}>
+      <Modal 
+        isOpen={!!editUser}
+        title="Edit User" 
+        onClose={() => {
+          setEditUser(null);
+          setModalError("");
+        }}
+        onConfirm={handleEditSave}
+        confirmText="Save Changes"
+      >
+          {modalError && <p className="text-red-600 text-sm mb-4 p-3 bg-red-50 rounded">{modalError}</p>}
           <div className="space-y-4">
-            <input
-              type="text"
-              value={editForm.name}
-              onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-              className="w-full p-2 border rounded-md"
-              placeholder="User Name"
-            />
-            <select
-              value={editForm.role}
-              onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
-              className="w-full p-2 border rounded-md"
-            >
-              <option value="developer">Developer</option>
-              <option value="mentor">Mentor</option>
-              <option value="admin">Admin</option>
-            </select>
-            {modalError && <p className="text-red-500 text-sm">{modalError}</p>}
-            <div className="flex justify-end gap-2">
-              <Button onClick={handleEditSave} variant="primary">
-                Save
-              </Button>
-              <Button onClick={() => setEditUser(null)} variant="secondary">
-                Cancel
-              </Button>
+            <div>
+              <label className="block text-sm font-medium mb-2">Full Name</label>
+              <input
+                type="text"
+                value={editForm.name}
+                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                className="w-full p-2 border rounded-md"
+                placeholder="User Name"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Email</label>
+              <input
+                type="email"
+                value={editForm.email}
+                onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                className="w-full p-2 border rounded-md"
+                placeholder="user@example.com"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Role</label>
+              <select
+                value={editForm.role}
+                onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
+                className="w-full p-2 border rounded-md"
+              >
+                <option value="developer">Developer</option>
+                <option value="mentor">Mentor</option>
+                <option value="admin">Admin</option>
+              </select>
             </div>
           </div>
-        </Modal>
-      )}
-      {deleteUser && (
-        <Modal title="Confirm Delete" onClose={() => setDeleteUser(null)}>
-          <p className="mb-4">Are you sure you want to delete this user?</p>
-          <div className="flex justify-end gap-2">
-            <Button onClick={handleDelete} variant="danger">
-              Delete
-            </Button>
-            <Button onClick={() => setDeleteUser(null)} variant="secondary">
-              Cancel
-            </Button>
-          </div>
-        </Modal>
-      )}
+      </Modal>
+      <Modal 
+        isOpen={!!deleteUser}
+        title="Delete User" 
+        onClose={() => {
+          setDeleteUser(null);
+          setModalError("");
+        }}
+        onConfirm={handleDeleteUser}
+        confirmText="Delete"
+        isDanger
+      >
+          {modalError && <p className="text-red-600 text-sm mb-4 p-3 bg-red-50 rounded">{modalError}</p>}
+          <p>Are you sure you want to delete user <strong>{deleteUser?.name}</strong>? This action cannot be undone.</p>
+      </Modal>
     </div>
   );
 }

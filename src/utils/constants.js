@@ -1,3 +1,4 @@
+// src/utils/constants.js
 import {
   Home,
   Search,
@@ -8,11 +9,15 @@ import {
   User,
 } from "lucide-react";
 
-// --- THEME CONSTANTS ---
+// =========================
+// 🎨 THEME COLORS
+// =========================
 export const PRIMARY_COLOR = "#032f60"; // Dark Blue
-export const ACCENT_COLOR = "#FFC107"; // Gold/Premium
+export const ACCENT_COLOR = "#FFC107";  // Gold / Premium Highlight
 
-// --- SIDEBAR ITEMS (Developer Dashboard) ---
+// =========================
+// 🧭 DEVELOPER DASHBOARD SIDEBAR ITEMS
+// =========================
 export const sidebarItems = [
   { name: "Home / Feed", slug: "feed", icon: Home },
   { name: "Find Mentors / Developers", slug: "find", icon: Search },
@@ -24,7 +29,9 @@ export const sidebarItems = [
   { name: "Profile", slug: "profile", icon: User },
 ];
 
-// --- MENTOR SIDEBAR ITEMS (for Mentor Dashboard, if used) ---
+// =========================
+// 🎓 MENTOR DASHBOARD SIDEBAR ITEMS
+// =========================
 export const mentorSidebarItems = [
   { name: "Dashboard", slug: "dashboard" },
   { name: "Connection Requests", slug: "requests" },
@@ -34,7 +41,9 @@ export const mentorSidebarItems = [
   { name: "Profile", slug: "profile" },
 ];
 
-// --- TAG COLOR UTILITY ---
+// =========================
+// 🏷️ TAG COLOR UTILITY
+// =========================
 const TAG_COLORS = [
   "bg-blue-100 text-blue-800 border-blue-200",
   "bg-yellow-100 text-yellow-800 border-yellow-200",
@@ -44,9 +53,12 @@ const TAG_COLORS = [
   "bg-sky-100 text-sky-800 border-sky-200",
 ];
 
-export const getTagColor = (index) => TAG_COLORS[index % TAG_COLORS.length];
+export const getTagColor = (index) =>
+  TAG_COLORS[index % TAG_COLORS.length];
 
-// --- MOCK POST DATA ---
+// =========================
+// 🧠 MOCK POST DATA (for Home Feed)
+// =========================
 export const mockPosts = [
   {
     id: 1,
@@ -56,7 +68,7 @@ export const mockPosts = [
     timeAgo: "2 hours ago",
     skills: ["React", "TypeScript", "Redux"],
     content:
-      "Just finished implementing a complex state management solution using Redux Toolkit and immutable updates. The performance improvements are incredible! Happy to share insights with anyone working on similar challenges.",
+      "Just finished implementing a complex state management solution using Redux Toolkit — performance improvements are massive! Happy to share insights with anyone working on similar challenges.",
     imageUrl:
       "https://placehold.co/800x400/1e293b/cbd5e1?text=Code+Snippet+Visualization",
     likes: 24,
@@ -71,7 +83,7 @@ export const mockPosts = [
     timeAgo: "Yesterday",
     skills: ["Kubernetes", "AWS", "Terraform"],
     content:
-      "My team successfully migrated our main microservice to Kubernetes. Took three weeks of planning, but the auto-scaling capabilities are a huge win. Never underestimate the power of a clean Terraform config!",
+      "My team migrated our main microservice to Kubernetes. Took weeks of planning, but the auto-scaling capabilities are a huge win. Never underestimate a clean Terraform config!",
     imageUrl: null,
     likes: 157,
     comments: 41,
@@ -85,7 +97,7 @@ export const mockPosts = [
     timeAgo: "3 days ago",
     skills: ["Python", "Pandas", "Machine Learning"],
     content:
-      "I wrote a quick article explaining how to efficiently clean messy datasets using Pandas vectorized operations instead of traditional loops. Link in my profile! It dramatically cuts down processing time.",
+      "Wrote a quick article on cleaning messy datasets using Pandas vectorized ops instead of loops — cuts down processing time dramatically. Link in my profile!",
     imageUrl:
       "https://placehold.co/800x400/004d40/ffffff?text=Data+Science+Graph",
     likes: 88,

@@ -3,7 +3,7 @@ import { ImagePlus, X } from "lucide-react";
 import PostCard from "./components/postcard/PostCard";
 import Button from "../../components/Button";
 import useAuthStore from "../../ZustandStore/useAuthStore";
-import { toast } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { getPosts, createPost } from "../../api/postsApi";
 
 export default function HomeFeed() {
@@ -94,11 +94,9 @@ export default function HomeFeed() {
   return (
     <div className="flex flex-col w-full">
       {/* Header */}
-      <div className="mb-6 w-full">
-        <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
-          Community Feed
-        </h2>
-        <p className="text-sm md:text-base text-gray-600 mt-1">
+      <div className="bg-[#032f60] text-white rounded-xl p-6 mb-6 w-full shadow-2xl">
+        <h2 className="text-2xl md:text-3xl font-bold">Community Feed</h2>
+        <p className="text-sm md:text-base text-white/80 mt-1">
           Share your thoughts with developers and mentors
         </p>
       </div>

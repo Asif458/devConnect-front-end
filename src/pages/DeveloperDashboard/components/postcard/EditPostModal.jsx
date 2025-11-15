@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ImagePlus, Trash2 } from "lucide-react";
 import Modal from "../Modal";
+import Shimmer from "../../../../components/Shimmer";
 
 const EditPostModal = ({ 
   isOpen, 
@@ -146,7 +147,7 @@ const EditPostModal = ({
         >
           {submitting ? (
             <span className="flex items-center gap-2">
-              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              <Shimmer type="circle" className="w-4 h-4" />
               Updating...
             </span>
           ) : (

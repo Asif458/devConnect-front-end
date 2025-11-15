@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { MoreHorizontal, Pencil, Trash2, Flag } from "lucide-react";
+import PremiumBadge from "../../../../components/shared/PremiumBadge";
+import MentorBadge from "../../../../components/shared/MentorBadge";
 
 const PostHeader = ({ userId, timeAgo, isOwner, onEdit, onDelete, onReport }) => {
   const [showMenu, setShowMenu] = useState(false);
@@ -30,9 +32,17 @@ const PostHeader = ({ userId, timeAgo, isOwner, onEdit, onDelete, onReport }) =>
         </div>
 
         <div className="flex-1 min-w-0">
-          <p className="text-sm md:text-base font-semibold text-gray-900 hover:text-sky-600 hover:underline transition-all cursor-pointer truncate">
-            {userId?.name || "Unknown User"}
-          </p>
+          <div className="flex items-center gap-2 flex-wrap mb-1">
+            <p className="text-sm md:text-base font-semibold text-gray-900 hover:text-sky-600 hover:underline transition-all cursor-pointer truncate">
+              {userId?.name || "Unknown User"}
+            </p>
+            {userId && (
+              <>
+                <PremiumBadge user={userId} variant="small" />
+                <MentorBadge user={userId} variant="small" />
+              </>
+            )}
+          </div>
           <p className="text-xs text-gray-500 hover:text-gray-700 transition-colors cursor-pointer">
             {timeAgo}
           </p>

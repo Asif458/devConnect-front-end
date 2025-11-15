@@ -7,7 +7,7 @@ import api from "../api/axios";
 import { KeyRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../ZustandStore/useAuthStore"; // ✅ Zustand store
-import { toast } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 const OTPSchema = Yup.object().shape({
   otp: Yup.string().length(6, "OTP must be 6 digits").required("OTP is required"),

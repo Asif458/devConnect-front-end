@@ -15,7 +15,8 @@ export const createPost = (formData) =>
 export const toggleLikePost = (postId) => api.post(`/post/${postId}/like`);
 
 // Report a post
-export const reportPost = (postId) => api.post(`/post/${postId}/report`);
+export const reportPost = (postId, reason, description) => 
+  api.post(`/post/${postId}/report`, { reason, description });
 
 // Delete a post
 export const deletePost = (postId) => api.delete(`/post/${postId}`);

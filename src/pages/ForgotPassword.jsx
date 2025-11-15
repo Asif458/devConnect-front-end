@@ -1,14 +1,14 @@
- import React, { useState } from "react";
+import React, { useState } from "react";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { Mail, Lock, KeyRound, ArrowLeft } from "lucide-react";
 import InputField from "../components/InputField";
 import Button from "../components/Button";
 import api from "../api/axios";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
- 
 // Validation Schemas
- 
 
 const ForgotPasswordSchema = Yup.object().shape({
     email: Yup.string().email("Invalid email").required("Email is required"),
@@ -24,7 +24,7 @@ const ResetPasswordSchema = Yup.object().shape({
 export default function ForgotPassword() {
     const [view, setView] = useState('forgot');  
     const [userEmail, setUserEmail] = useState('');
-    const [successMessage, setSuccessMessage] = useState('');
+    const navigate = useNavigate();
 
     const handleSendOtp = async (values, { setSubmitting, setErrors }) => {
         try {
@@ -33,9 +33,11 @@ export default function ForgotPassword() {
             // On success:
             setUserEmail(values.email);
             setView('reset');
-
+            toast.success("OTP sent to your email!");
         } catch (error) {
-            setErrors({ email: error.response?.data?.message || 'Failed to send OTP.' });
+            const errorMsg = error.response?.data?.message || 'Failed to send OTP.';
+            setErrors({ email: errorMsg });
+            toast.error(errorMsg);
         } finally {
             setSubmitting(false);
         }
@@ -48,13 +50,15 @@ export default function ForgotPassword() {
             await api.post('/auth/verify-otp', submissionData);
             
             // On success:
-            setSuccessMessage("Password has been reset successfully! Redirecting to login...");
+            toast.success("Password has been reset successfully!");
             setTimeout(() => {
-                window.location.href = '/login';
+                navigate('/login');
             }, 2000);
 
         } catch (error) {
-            setErrors({ otp: error.response?.data?.message || 'Failed to reset password.' });
+            const errorMsg = error.response?.data?.message || 'Failed to reset password.';
+            setErrors({ otp: errorMsg });
+            toast.error(errorMsg);
         } finally {
             setSubmitting(false);
         }
@@ -76,64 +80,55 @@ export default function ForgotPassword() {
                 {/* Form Panel */}
                 <div className="w-full md:w-3/5 p-8 sm:p-12 flex flex-col justify-center">
                     <div className="max-w-sm mx-auto w-full">
-                        {successMessage ? (
-                            <div className="text-center">
-                                 <h2 className="text-2xl font-bold text-gray-900 mb-4">Success!</h2>
-                                 <p className="text-gray-600">{successMessage}</p>
+                        {view === 'forgot' ? (
+                            // Forgot Password View
+                            <div>
+                                <h2 className="text-2xl font-bold text-gray-900 mb-2">Forgot Password</h2>
+                                <p className="text-gray-600 mb-8">Enter your email to receive a reset OTP.</p>
+                                <Formik
+                                    initialValues={{ email: '' }}
+                                    validationSchema={ForgotPasswordSchema}
+                                    onSubmit={handleSendOtp}
+                                >
+                                    {({ isSubmitting }) => (
+                                        <Form className="space-y-6">
+                                            <InputField label="Email Address" name="email" type="email" icon={Mail} />
+                                            <Button loading={isSubmitting}>
+                                                {isSubmitting ? "Sending..." : "Send OTP"}
+                                            </Button>
+                                        </Form>
+                                    )}
+                                </Formik>
                             </div>
                         ) : (
-                            <>
-                                {view === 'forgot' ? (
-                                    // Forgot Password View
-                                    <div>
-                                        <h2 className="text-2xl font-bold text-gray-900 mb-2">Forgot Password</h2>
-                                        <p className="text-gray-600 mb-8">Enter your email to receive a reset OTP.</p>
-                                        <Formik
-                                            initialValues={{ email: '' }}
-                                            validationSchema={ForgotPasswordSchema}
-                                            onSubmit={handleSendOtp}
-                                        >
-                                            {({ isSubmitting }) => (
-                                                <Form className="space-y-6">
-                                                    <InputField label="Email Address" name="email" type="email" icon={Mail} />
-                                                    <Button loading={isSubmitting}>
-                                                        {isSubmitting ? "Sending..." : "Send OTP"}
-                                                    </Button>
-                                                </Form>
-                                            )}
-                                        </Formik>
-                                    </div>
-                                ) : (
-                                    // OTP Reset View
-                                    <div>
-                                        <h2 className="text-2xl font-bold text-gray-900 mb-2">Reset Your Password</h2>
-                                        <p className="text-gray-600 mb-8">An OTP was sent to <span className="font-semibold">{userEmail}</span>.</p>
-                                        <Formik
-                                            initialValues={{ otp: '', newPassword: '' }}
-                                            validationSchema={ResetPasswordSchema}
-                                            onSubmit={handleResetPassword}
-                                        >
-                                            {({ isSubmitting }) => (
-                                                <Form className="space-y-6">
-                                                    <InputField label="6-Digit OTP" name="otp" type="text" icon={KeyRound} />
-                                                    <InputField label="New Password" name="newPassword" type="password" icon={Lock} />
-                                                    <Button loading={isSubmitting}>
-                                                        {isSubmitting ? "Resetting..." : "Reset Password"}
-                                                    </Button>
-                                                </Form>
-                                            )}
-                                        </Formik>
-                                    </div>
-                                )}
-
-                                <p className="text-center text-sm text-gray-600 mt-8">
-                                    <a href="/login" className="font-semibold text-[#043873] hover:underline inline-flex items-center">
-                                        <ArrowLeft className="w-4 h-4 mr-1"/>
-                                        Back to Login
-                                    </a>
-                                </p>
-                            </>
+                            // OTP Reset View
+                            <div>
+                                <h2 className="text-2xl font-bold text-gray-900 mb-2">Reset Your Password</h2>
+                                <p className="text-gray-600 mb-8">An OTP was sent to <span className="font-semibold">{userEmail}</span>.</p>
+                                <Formik
+                                    initialValues={{ otp: '', newPassword: '' }}
+                                    validationSchema={ResetPasswordSchema}
+                                    onSubmit={handleResetPassword}
+                                >
+                                    {({ isSubmitting }) => (
+                                        <Form className="space-y-6">
+                                            <InputField label="6-Digit OTP" name="otp" type="text" icon={KeyRound} />
+                                            <InputField label="New Password" name="newPassword" type="password" icon={Lock} />
+                                            <Button loading={isSubmitting}>
+                                                {isSubmitting ? "Resetting..." : "Reset Password"}
+                                            </Button>
+                                        </Form>
+                                    )}
+                                </Formik>
+                            </div>
                         )}
+
+                        <p className="text-center text-sm text-gray-600 mt-8">
+                            <a href="/login" className="font-semibold text-[#043873] hover:underline inline-flex items-center">
+                                <ArrowLeft className="w-4 h-4 mr-1"/>
+                                Back to Login
+                            </a>
+                        </p>
                     </div>
                 </div>
             </div>

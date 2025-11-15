@@ -15,7 +15,7 @@ const FriendRequestList = ({ type = "received" }) => {
     );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 max-h-[500px] overflow-y-auto">
       {requests.map((req) => (
         <FriendRequestCard
           key={req._id}

@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import PrivateRoute from "./components/PrivateRoute";
 import DeveloperDashboard from "./pages/DeveloperDashboard/Index";
 import MentorDashboard from "./pages/MentorDashboard/MentorDashboard";
@@ -14,6 +15,20 @@ import ProfilePage from "./pages/Profile/ProfilePage";
 function App() {
   return (
     <BrowserRouter>
+      <Toaster 
+        position="top-right" 
+        reverseOrder={false}
+        gutter={8}
+        toastOptions={{
+          duration: 5000,
+          style: {
+            background: '#032f60',
+            color: '#fff',
+            fontSize: '14px',
+            padding: '12px 16px',
+          },
+        }}
+      />
       <Routes>
         {/* Default redirect */}
         <Route path="/" element={<Navigate to="/landingpage" replace />} />

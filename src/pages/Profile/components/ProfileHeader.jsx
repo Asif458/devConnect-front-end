@@ -1,5 +1,7 @@
 import React from "react";
 import { Check } from "lucide-react";
+import PremiumBadge from "../../../components/shared/PremiumBadge";
+import MentorBadge from "../../../components/shared/MentorBadge";
 
 const ProfileHeader = ({
   user,
@@ -17,11 +19,8 @@ const ProfileHeader = ({
       <div className="pt-7">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-2xl font-bold text-[#182846]">{user.name}</span>
-          {user.role === "mentor" && (
-            <span className="flex items-center gap-1 px-2 py-0.5 bg-[#032f60] text-white text-xs rounded-full">
-              <Check size={14} /> Mentor
-            </span>
-          )}
+          <PremiumBadge user={user} variant="default" />
+          <MentorBadge user={user} variant="default" />
         </div>
         <div className="text-gray-600 text-base">@{user.username}</div>
         <div className="text-sm text-gray-500 flex items-center gap-3 mt-1 flex-wrap">

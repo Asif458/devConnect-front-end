@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import toast from "react-hot-toast";
+// All original imports remain the same
 import {
   toggleLikePost,
   reportPost,
@@ -18,6 +20,7 @@ import PostHashtags from "../postcard/PostHashtags";
 import PostInteractions from "../postcard/PostInteractions";
 import PostComments from "../postcard/PostComments";
 import PostCommentInput from "../postcard/PostCommentInput";
+import ReportModal from "../../../../components/ReportModal";
 
 dayjs.extend(relativeTime);
 
@@ -34,7 +37,7 @@ const PostCard = ({ post, currentUserId, onDelete, onUpdate }) => {
     reportCount: initialReportCount,
   } = post;
 
-  // State management
+  // --- State Management ---
   const [liked, setLiked] = useState(likes?.includes(currentUserId) || false);
   const [likeCount, setLikeCount] = useState(likes?.length || 0);
   const [, setReportCount] = useState(initialReportCount || 0);
@@ -44,13 +47,14 @@ const PostCard = ({ post, currentUserId, onDelete, onUpdate }) => {
   const [showAllComments, setShowAllComments] = useState(false);
   const [showFullImage, setShowFullImage] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
   const [postContent, setPostContent] = useState(content);
   const [postImage, setPostImage] = useState(mediaUrls?.[0] || null);
 
   const timeAgo = createdAt ? dayjs(createdAt).fromNow() : "";
   const isOwner = currentUserId === userId?._id;
 
-  // Handlers
+  // --- Handlers (Unchanged) ---
   const handleLike = async () => {
     try {
       const res = await toggleLikePost(_id);
@@ -61,15 +65,24 @@ const PostCard = ({ post, currentUserId, onDelete, onUpdate }) => {
     }
   };
 
-  const handleReport = async () => {
-    if (!window.confirm("Are you sure you want to report this post?")) return;
+  const handleReport = async (reason, description) => {
     try {
-      await reportPost(_id);
+      await reportPost(_id, reason, description);
+      toast.success("Post reported successfully. Our team will review it.", {
+        style: {
+          background: '#032f60',
+          color: '#fff',
+        },
+      });
       setReportCount((prev) => prev + 1);
-      alert("Post reported successfully! Our team will review it.");
     } catch (err) {
       console.error("Error reporting post:", err);
-      alert(err.response?.data?.error || "Failed to report post. Please try again.");
+      toast.error(err.response?.data?.message || "Failed to report post", {
+        style: {
+          background: '#dc2626',
+          color: '#fff',
+        },
+      });
     }
   };
 
@@ -78,10 +91,8 @@ const PostCard = ({ post, currentUserId, onDelete, onUpdate }) => {
     try {
       await apiDeletePost(_id);
       if (onDelete) onDelete(_id);
-      alert("Post deleted successfully!");
     } catch (err) {
       console.error("Error deleting post:", err);
-      alert("Failed to delete post. Please try again.");
     }
   };
 
@@ -91,10 +102,8 @@ const PostCard = ({ post, currentUserId, onDelete, onUpdate }) => {
       setPostContent(res.data.content);
       setPostImage(res.data.mediaUrls?.[0] || null);
       if (onUpdate) onUpdate(res.data);
-      alert("Post updated successfully!");
     } catch (err) {
       console.error("Error updating post:", err);
-      alert("Failed to update post: " + (err.response?.data?.error || err.message));
       throw err;
     }
   };
@@ -103,9 +112,10 @@ const PostCard = ({ post, currentUserId, onDelete, onUpdate }) => {
     if (!commentText.trim()) return;
     try {
       const res = await addComment(_id, commentText);
-      setComments((prev) => [...prev, res.data]);
+      setComments((prev) => [...prev, res.data]); 
       setCommentText("");
-      setShowCommentInput(false);
+      setShowCommentInput(true);
+      setShowAllComments(true);
     } catch (err) {
       console.error("Error adding comment:", err);
     }
@@ -118,44 +128,73 @@ const PostCard = ({ post, currentUserId, onDelete, onUpdate }) => {
       setComments((prev) => prev.filter((c) => c._id !== commentId));
     } catch (err) {
       console.error("Error deleting comment:", err);
-      alert("Failed to delete comment: " + (err.response?.data?.error || err.message));
     }
   };
 
-  return (
-    <><div className="bg-white rounded-2xl shadow-sm border border-gray-200 hover:shadow-md max-w-4xl w-full p-6 mx-auto">
+  // --- UI RENDER with Increased Width ---
 
+  return (
+    <>
+      {/* Post Card Container: Removed max-w-4xl to increase size */}
+      <div 
+        className="
+          bg-white 
+          rounded-xl 
+          shadow-lg 
+          border border-gray-100 
+          w-full 
+          p-6 
+          mx-auto 
+          transition-all duration-300 ease-in-out
+          hover:shadow-xl hover:border-blue-100 
+          md:p-8
+        "
+      >
+        {/* Post Header (Profile, Name, Time, and Options Dropdown) */}
         <PostHeader
           userId={userId}
           timeAgo={timeAgo}
           isOwner={isOwner}
           onEdit={() => setShowEditModal(true)}
           onDelete={handleDelete}
-          onReport={handleReport}
+          onReport={() => setShowReportModal(true)}
         />
+        
+        {/* Skills/Tags (Slightly separated) */}
+        <div className="mt-2 mb-3">
+          <PostSkills skills={userId?.skills} />
+        </div>
 
-        <PostSkills skills={userId?.skills} />
+        {/* Post Content */}
         <PostContent content={postContent} />
+        
+        {/* Post Image */}
         <PostImage
           imageUrl={postImage}
           showFullImage={showFullImage}
           setShowFullImage={setShowFullImage}
         />
+        
+        {/* Hashtags */}
         <PostHashtags hashtags={hashtags} />
 
-        <PostInteractions
-          likeCount={likeCount}
-          liked={liked}
-          commentsCount={comments.length}
-          isOwner={isOwner}
-          onLike={handleLike}
-          onComment={() => setShowCommentInput(!showCommentInput)}
-          onReport={handleReport}
-          showCommentInput={showCommentInput}
-          showAllComments={showAllComments}
-          setShowAllComments={setShowAllComments}
-        />
-
+        {/* --- Interaction Bar (Modern Separator) --- */}
+        <div className="py-2 mt-3 border-y border-gray-100">
+          <PostInteractions
+            likeCount={likeCount}
+            liked={liked}
+            commentsCount={comments.length}
+            isOwner={isOwner}
+            onLike={handleLike}
+            onComment={() => setShowCommentInput(!showCommentInput)}
+            onReport={() => setShowReportModal(true)}
+            showCommentInput={showCommentInput}
+            showAllComments={showAllComments}
+            setShowAllComments={setShowAllComments}
+          />
+        </div>
+        
+        {/* Comments Section */}
         <PostComments
           comments={comments}
           currentUserId={currentUserId}
@@ -164,7 +203,8 @@ const PostCard = ({ post, currentUserId, onDelete, onUpdate }) => {
           onDeleteComment={handleDeleteComment}
         />
 
-        {showCommentInput && (
+        {/* Comment Input */}
+        {(showCommentInput || comments.length > 0) && (
           <PostCommentInput
             commentText={commentText}
             setCommentText={setCommentText}
@@ -173,12 +213,20 @@ const PostCard = ({ post, currentUserId, onDelete, onUpdate }) => {
         )}
       </div>
 
+      {/* Edit Post Modal */}
       <EditPostModal
         isOpen={showEditModal}
         onClose={() => setShowEditModal(false)}
         initialContent={postContent}
         initialImage={postImage}
         onUpdate={handleUpdatePost}
+      />
+
+      {/* Report Modal */}
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        onSubmit={handleReport}
       />
     </>
   );
